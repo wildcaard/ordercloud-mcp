@@ -1,0 +1,17 @@
+{
+  "mcpServers": {
+    "ordercloud": {
+      "type": "stdio",
+      "command": "node",
+      "args": ["dist/index.js"],
+      "cwd": "C:\\Projects\\ordercloud-mcp",
+      "env": {
+        "ORDERCLOUD_BASE_URL": "https://sandboxapi.ordercloud.io",
+        "ORDERCLOUD_CLIENT_ID": "",
+        "ORDERCLOUD_CLIENT_SECRET": "",
+        "ORDERCLOUD_AUTH_URL": "https://auth.ordercloud.io/oauth/token",
+        "ORDERCLOUD_SCOPE": "FullAccess"
+      }
+    }
+  }
+}

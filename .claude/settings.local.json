@@ -1,0 +1,6 @@
+{
+  "enabledMcpjsonServers": [
+    "ordercloud"
+  ],
+  "enableAllProjectMcpServers": true
+}
