@@ -1,6 +1,6 @@
 # ordercloud-mcp
 
-MCP Server for Sitecore OrderCloud — exposes admin operations as typed MCP tools for Claude Code and other MCP clients.
+MCP Server for Sitecore OrderCloud exposes admin operations as typed MCP tools for Claude Code and other MCP clients.
 
 ## Quick Start
 
