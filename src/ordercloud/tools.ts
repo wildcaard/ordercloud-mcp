@@ -120,10 +120,12 @@ function resolveResourcePath(type: ResourceType, ids: Record<string, string>): s
 export function registerTools(server: McpServer, client: OrderCloudClient): void {
   // ── A) Health & Auth ──
 
-  server.tool(
+  server.registerTool(
     "ordercloud.ping",
-    "Check OrderCloud connectivity, auth mode, and token status",
-    {},
+    {
+      description: "Check OrderCloud connectivity, auth mode, and token status",
+      annotations: { readOnlyHint: true },
+    },
     async () => {
       try {
         const ping = await client.ping();
@@ -142,15 +144,17 @@ export function registerTools(server: McpServer, client: OrderCloudClient): void
 
   // ── B) Products ──
 
-  server.tool(
+  server.registerTool(
     "ordercloud.products.search",
-    "Search and list OrderCloud products with filtering, pagination, and sorting",
     {
-      search: z.string().optional().describe("Keyword search across product fields"),
-      filters: z.record(z.string()).optional().describe("Field-level filters, e.g. {\"Active\": \"true\", \"Name\": \"Widget*\"}"),
-      page: z.number().int().min(1).optional().describe("Page number (1-based)"),
-      pageSize: z.number().int().min(1).max(100).optional().describe("Items per page (max 100)"),
-      sortBy: z.string().optional().describe("Sort field, prefix with ! for descending, e.g. \"!DateCreated\""),
+      description: "Search and list OrderCloud products with filtering, pagination, and sorting",
+      inputSchema: z.object({
+        search: z.string().optional().describe("Keyword search across product fields"),
+        filters: z.record(z.string()).optional().describe("Field-level filters, e.g. {\"Active\": \"true\", \"Name\": \"Widget*\"}"),
+        page: z.number().int().min(1).optional().describe("Page number (1-based)"),
+        pageSize: z.number().int().min(1).max(100).optional().describe("Items per page (max 100)"),
+        sortBy: z.string().optional().describe("Sort field, prefix with ! for descending, e.g. \"!DateCreated\""),
+      }),
     },
     async (params) => {
       try {
@@ -163,10 +167,14 @@ export function registerTools(server: McpServer, client: OrderCloudClient): void
     }
   );
 
-  server.tool(
+  server.registerTool(
     "ordercloud.products.get",
-    "Get a single OrderCloud product by ID",
-    { productId: z.string().describe("The product ID") },
+    {
+      description: "Get a single OrderCloud product by ID",
+      inputSchema: z.object({
+        productId: z.string().describe("The product ID"),
+      }),
+    },
     async ({ productId }) => {
       try {
         const data = await client.request("GET", `/v1/products/${productId}`);
@@ -177,23 +185,25 @@ export function registerTools(server: McpServer, client: OrderCloudClient): void
     }
   );
 
-  server.tool(
+  server.registerTool(
     "ordercloud.products.create",
-    "Create a new OrderCloud product",
     {
-      product: z.object({
-        ID: z.string().describe("Unique product ID"),
-        Name: z.string().describe("Product name"),
-        Description: z.string().optional(),
-        Active: z.boolean().optional().default(true),
-        QuantityMultiplier: z.number().int().optional(),
-        ShipWeight: z.number().optional(),
-        ShipHeight: z.number().optional(),
-        ShipWidth: z.number().optional(),
-        ShipLength: z.number().optional(),
-        DefaultPriceScheduleID: z.string().optional(),
-        xp: z.record(z.unknown()).optional().describe("Extended properties"),
-      }).describe("Product object to create"),
+      description: "Create a new OrderCloud product",
+      inputSchema: z.object({
+        product: z.object({
+          ID: z.string().describe("Unique product ID"),
+          Name: z.string().describe("Product name"),
+          Description: z.string().optional(),
+          Active: z.boolean().optional().default(true),
+          QuantityMultiplier: z.number().int().optional(),
+          ShipWeight: z.number().optional(),
+          ShipHeight: z.number().optional(),
+          ShipWidth: z.number().optional(),
+          ShipLength: z.number().optional(),
+          DefaultPriceScheduleID: z.string().optional(),
+          xp: z.record(z.unknown()).optional().describe("Extended properties"),
+        }).describe("Product object to create"),
+      }),
     },
     async ({ product }) => {
       try {
@@ -205,12 +215,14 @@ export function registerTools(server: McpServer, client: OrderCloudClient): void
     }
   );
 
-  server.tool(
+  server.registerTool(
     "ordercloud.products.patch",
-    "Partially update an OrderCloud product (JSON Merge Patch semantics)",
     {
-      productId: z.string().describe("The product ID to update"),
-      patch: z.record(z.unknown()).describe("Fields to update, e.g. {\"Name\": \"New Name\", \"xp\": {\"color\": \"red\"}}"),
+      description: "Partially update an OrderCloud product (JSON Merge Patch semantics)",
+      inputSchema: z.object({
+        productId: z.string().describe("The product ID to update"),
+        patch: z.record(z.unknown()).describe("Fields to update, e.g. {\"Name\": \"New Name\", \"xp\": {\"color\": \"red\"}}"),
+      }),
     },
     async ({ productId, patch }) => {
       try {
@@ -222,10 +234,14 @@ export function registerTools(server: McpServer, client: OrderCloudClient): void
     }
   );
 
-  server.tool(
+  server.registerTool(
     "ordercloud.products.delete",
-    "Delete an OrderCloud product by ID",
-    { productId: z.string().describe("The product ID to delete") },
+    {
+      description: "Delete an OrderCloud product by ID",
+      inputSchema: z.object({
+        productId: z.string().describe("The product ID to delete"),
+      }),
+    },
     async ({ productId }) => {
       try {
         await client.request("DELETE", `/v1/products/${productId}`);
@@ -238,12 +254,14 @@ export function registerTools(server: McpServer, client: OrderCloudClient): void
 
   // ── C) Catalogs & Categories ──
 
-  server.tool(
+  server.registerTool(
     "ordercloud.catalogs.list",
-    "List OrderCloud catalogs with pagination",
     {
-      page: z.number().int().min(1).optional(),
-      pageSize: z.number().int().min(1).max(100).optional(),
+      description: "List OrderCloud catalogs with pagination",
+      inputSchema: z.object({
+        page: z.number().int().min(1).optional(),
+        pageSize: z.number().int().min(1).max(100).optional(),
+      }),
     },
     async (params) => {
       try {
@@ -256,15 +274,17 @@ export function registerTools(server: McpServer, client: OrderCloudClient): void
     }
   );
 
-  server.tool(
+  server.registerTool(
     "ordercloud.categories.search",
-    "Search categories within an OrderCloud catalog",
     {
-      catalogId: z.string().describe("The catalog ID"),
-      search: z.string().optional(),
-      filters: z.record(z.string()).optional(),
-      page: z.number().int().min(1).optional(),
-      pageSize: z.number().int().min(1).max(100).optional(),
+      description: "Search categories within an OrderCloud catalog",
+      inputSchema: z.object({
+        catalogId: z.string().describe("The catalog ID"),
+        search: z.string().optional(),
+        filters: z.record(z.string()).optional(),
+        page: z.number().int().min(1).optional(),
+        pageSize: z.number().int().min(1).max(100).optional(),
+      }),
     },
     async (params) => {
       try {
@@ -277,12 +297,14 @@ export function registerTools(server: McpServer, client: OrderCloudClient): void
     }
   );
 
-  server.tool(
+  server.registerTool(
     "ordercloud.categories.get",
-    "Get a single category from an OrderCloud catalog",
     {
-      catalogId: z.string().describe("The catalog ID"),
-      categoryId: z.string().describe("The category ID"),
+      description: "Get a single category from an OrderCloud catalog",
+      inputSchema: z.object({
+        catalogId: z.string().describe("The catalog ID"),
+        categoryId: z.string().describe("The category ID"),
+      }),
     },
     async ({ catalogId, categoryId }) => {
       try {
@@ -296,13 +318,15 @@ export function registerTools(server: McpServer, client: OrderCloudClient): void
 
   // ── D) Buyers & Users ──
 
-  server.tool(
+  server.registerTool(
     "ordercloud.buyers.search",
-    "Search OrderCloud buyer organizations",
     {
-      search: z.string().optional(),
-      page: z.number().int().min(1).optional(),
-      pageSize: z.number().int().min(1).max(100).optional(),
+      description: "Search OrderCloud buyer organizations",
+      inputSchema: z.object({
+        search: z.string().optional(),
+        page: z.number().int().min(1).optional(),
+        pageSize: z.number().int().min(1).max(100).optional(),
+      }),
     },
     async (params) => {
       try {
@@ -315,14 +339,16 @@ export function registerTools(server: McpServer, client: OrderCloudClient): void
     }
   );
 
-  server.tool(
+  server.registerTool(
     "ordercloud.users.search",
-    "Search users within an OrderCloud buyer organization",
     {
-      buyerId: z.string().describe("The buyer organization ID"),
-      search: z.string().optional(),
-      page: z.number().int().min(1).optional(),
-      pageSize: z.number().int().min(1).max(100).optional(),
+      description: "Search users within an OrderCloud buyer organization",
+      inputSchema: z.object({
+        buyerId: z.string().describe("The buyer organization ID"),
+        search: z.string().optional(),
+        page: z.number().int().min(1).optional(),
+        pageSize: z.number().int().min(1).max(100).optional(),
+      }),
     },
     async (params) => {
       try {
@@ -335,12 +361,14 @@ export function registerTools(server: McpServer, client: OrderCloudClient): void
     }
   );
 
-  server.tool(
+  server.registerTool(
     "ordercloud.users.get",
-    "Get a single user from an OrderCloud buyer organization",
     {
-      buyerId: z.string().describe("The buyer organization ID"),
-      userId: z.string().describe("The user ID"),
+      description: "Get a single user from an OrderCloud buyer organization",
+      inputSchema: z.object({
+        buyerId: z.string().describe("The buyer organization ID"),
+        userId: z.string().describe("The user ID"),
+      }),
     },
     async ({ buyerId, userId }) => {
       try {
@@ -354,18 +382,20 @@ export function registerTools(server: McpServer, client: OrderCloudClient): void
 
   // ── E) Orders ──
 
-  server.tool(
+  server.registerTool(
     "ordercloud.orders.search",
-    "Search OrderCloud orders with direction, status, date range, filtering, and pagination",
     {
-      direction: z.enum(["Incoming", "Outgoing"]).describe("Order direction: Incoming (seller view) or Outgoing (buyer view)"),
-      search: z.string().optional().describe("Keyword search"),
-      status: z.string().optional().describe("Filter by order status, e.g. Open, AwaitingApproval, Completed"),
-      from: z.string().optional().describe("Start date filter (ISO 8601), maps to FromDate"),
-      to: z.string().optional().describe("End date filter (ISO 8601), maps to ToDate"),
-      filters: z.record(z.string()).optional().describe("Additional field-level filters"),
-      page: z.number().int().min(1).optional(),
-      pageSize: z.number().int().min(1).max(100).optional(),
+      description: "Search OrderCloud orders with direction, status, date range, filtering, and pagination",
+      inputSchema: z.object({
+        direction: z.enum(["Incoming", "Outgoing"]).describe("Order direction: Incoming (seller view) or Outgoing (buyer view)"),
+        search: z.string().optional().describe("Keyword search"),
+        status: z.string().optional().describe("Filter by order status, e.g. Open, AwaitingApproval, Completed"),
+        from: z.string().optional().describe("Start date filter (ISO 8601), maps to FromDate"),
+        to: z.string().optional().describe("End date filter (ISO 8601), maps to ToDate"),
+        filters: z.record(z.string()).optional().describe("Additional field-level filters"),
+        page: z.number().int().min(1).optional(),
+        pageSize: z.number().int().min(1).max(100).optional(),
+      }),
     },
     async (params) => {
       try {
@@ -386,12 +416,14 @@ export function registerTools(server: McpServer, client: OrderCloudClient): void
     }
   );
 
-  server.tool(
+  server.registerTool(
     "ordercloud.orders.get",
-    "Get a single OrderCloud order by ID and direction",
     {
-      direction: z.enum(["Incoming", "Outgoing"]).describe("Order direction"),
-      orderId: z.string().describe("The order ID"),
+      description: "Get a single OrderCloud order by ID and direction",
+      inputSchema: z.object({
+        direction: z.enum(["Incoming", "Outgoing"]).describe("Order direction"),
+        orderId: z.string().describe("The order ID"),
+      }),
     },
     async ({ direction, orderId }) => {
       try {
@@ -403,12 +435,14 @@ export function registerTools(server: McpServer, client: OrderCloudClient): void
     }
   );
 
-  server.tool(
+  server.registerTool(
     "ordercloud.orders.getWorksheet",
-    "Get the full order worksheet (order + line items + promotions + payments) for an OrderCloud order",
     {
-      direction: z.enum(["Incoming", "Outgoing"]).describe("Order direction"),
-      orderId: z.string().describe("The order ID"),
+      description: "Get the full order worksheet (order + line items + promotions + payments) for an OrderCloud order",
+      inputSchema: z.object({
+        direction: z.enum(["Incoming", "Outgoing"]).describe("Order direction"),
+        orderId: z.string().describe("The order ID"),
+      }),
     },
     async ({ direction, orderId }) => {
       try {
@@ -430,14 +464,16 @@ export function registerTools(server: McpServer, client: OrderCloudClient): void
 
   // ── F) XP Helpers ──
 
-  server.tool(
+  server.registerTool(
     "ordercloud.xp.get",
-    "Read extended properties (xp) from any OrderCloud resource (Product, Category, Order, User, Buyer)",
     {
-      resourceType: z.enum(["Product", "Category", "Order", "User", "Buyer"]).describe("The resource type"),
-      identifiers: z.record(z.string()).describe(
-        "Resource identifiers, e.g. {\"productId\": \"abc\"} or {\"catalogId\": \"cat1\", \"categoryId\": \"categ1\"}"
-      ),
+      description: "Read extended properties (xp) from any OrderCloud resource (Product, Category, Order, User, Buyer)",
+      inputSchema: z.object({
+        resourceType: z.enum(["Product", "Category", "Order", "User", "Buyer"]).describe("The resource type"),
+        identifiers: z.record(z.string()).describe(
+          "Resource identifiers, e.g. {\"productId\": \"abc\"} or {\"catalogId\": \"cat1\", \"categoryId\": \"categ1\"}"
+        ),
+      }),
     },
     async ({ resourceType, identifiers }) => {
       try {
@@ -450,15 +486,17 @@ export function registerTools(server: McpServer, client: OrderCloudClient): void
     }
   );
 
-  server.tool(
+  server.registerTool(
     "ordercloud.xp.patch",
-    "Safely update extended properties (xp) on any OrderCloud resource with deep merge. Rejects keys starting with '$' and payloads over 64KB.",
     {
-      resourceType: z.enum(["Product", "Category", "Order", "User", "Buyer"]).describe("The resource type"),
-      identifiers: z.record(z.string()).describe(
-        "Resource identifiers, e.g. {\"productId\": \"abc\"}"
-      ),
-      xpPatch: z.record(z.unknown()).describe("XP fields to merge into the existing xp object"),
+      description: "Safely update extended properties (xp) on any OrderCloud resource with deep merge. Rejects keys starting with dollar sign and payloads over 64KB.",
+      inputSchema: z.object({
+        resourceType: z.enum(["Product", "Category", "Order", "User", "Buyer"]).describe("The resource type"),
+        identifiers: z.record(z.string()).describe(
+          "Resource identifiers, e.g. {\"productId\": \"abc\"}"
+        ),
+        xpPatch: z.record(z.unknown()).describe("XP fields to merge into the existing xp object"),
+      }),
     },
     async ({ resourceType, identifiers, xpPatch }) => {
       try {
