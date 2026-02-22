@@ -511,4 +511,823 @@ export function registerTools(server: McpServer, client: OrderCloudClient): void
       }
     }
   );
+
+  // ── G) Suppliers ──
+
+  server.registerTool(
+    "ordercloud.suppliers.search",
+    {
+      description: "Search OrderCloud suppliers",
+      inputSchema: z.object({
+        search: z.string().optional().describe("Keyword search"),
+        filters: z.record(z.string()).optional().describe("Field-level filters"),
+        page: z.number().int().min(1).optional(),
+        pageSize: z.number().int().min(1).max(100).optional(),
+        sortBy: z.string().optional(),
+      }),
+    },
+    async (params) => {
+      try {
+        const q = buildListQuery(params);
+        const data = await client.request<OcList>("GET", "/v1/suppliers", q);
+        return ok(normalizePagination(data));
+      } catch (e) {
+        return err(e);
+      }
+    }
+  );
+
+  server.registerTool(
+    "ordercloud.suppliers.get",
+    {
+      description: "Get a single OrderCloud supplier by ID",
+      inputSchema: z.object({
+        supplierId: z.string().describe("The supplier ID"),
+      }),
+    },
+    async ({ supplierId }) => {
+      try {
+        const data = await client.request("GET", `/v1/suppliers/${supplierId}`);
+        return ok(data);
+      } catch (e) {
+        return err(e);
+      }
+    }
+  );
+
+  server.registerTool(
+    "ordercloud.suppliers.create",
+    {
+      description: "Create a new OrderCloud supplier",
+      inputSchema: z.object({
+        supplier: z.object({
+          ID: z.string().describe("Unique supplier ID"),
+          Name: z.string().describe("Supplier name"),
+          Active: z.boolean().optional().default(true),
+          xp: z.record(z.unknown()).optional(),
+        }).describe("Supplier object to create"),
+      }),
+    },
+    async ({ supplier }) => {
+      try {
+        const data = await client.request("POST", "/v1/suppliers", undefined, supplier);
+        return ok(data);
+      } catch (e) {
+        return err(e);
+      }
+    }
+  );
+
+  server.registerTool(
+    "ordercloud.suppliers.patch",
+    {
+      description: "Partially update an OrderCloud supplier",
+      inputSchema: z.object({
+        supplierId: z.string().describe("The supplier ID to update"),
+        patch: z.record(z.unknown()).describe("Fields to update"),
+      }),
+    },
+    async ({ supplierId, patch }) => {
+      try {
+        const data = await client.request("PATCH", `/v1/suppliers/${supplierId}`, undefined, patch);
+        return ok(data);
+      } catch (e) {
+        return err(e);
+      }
+    }
+  );
+
+  server.registerTool(
+    "ordercloud.suppliers.delete",
+    {
+      description: "Delete an OrderCloud supplier by ID",
+      inputSchema: z.object({
+        supplierId: z.string().describe("The supplier ID to delete"),
+      }),
+    },
+    async ({ supplierId }) => {
+      try {
+        await client.request("DELETE", `/v1/suppliers/${supplierId}`);
+        return ok({ deleted: true, supplierId });
+      } catch (e) {
+        return err(e);
+      }
+    }
+  );
+
+  // ── H) Addresses ──
+
+  server.registerTool(
+    "ordercloud.addresses.listForEntity",
+    {
+      description: "List addresses for a Buyer or Supplier",
+      inputSchema: z.object({
+        entityType: z.enum(["Buyer", "Supplier"]).describe("Entity type"),
+        entityId: z.string().describe("Entity ID"),
+        page: z.number().int().min(1).optional(),
+        pageSize: z.number().int().min(1).max(100).optional(),
+      }),
+    },
+    async ({ entityType, entityId, page, pageSize }) => {
+      try {
+        const path = entityType === "Buyer" 
+          ? `/v1/buyers/${entityId}/addresses` 
+          : `/v1/suppliers/${entityId}/addresses`;
+        const q: Record<string, number | undefined> = { page, pageSize };
+        const data = await client.request<OcList>("GET", path, q);
+        return ok(normalizePagination(data));
+      } catch (e) {
+        return err(e);
+      }
+    }
+  );
+
+  server.registerTool(
+    "ordercloud.addresses.get",
+    {
+      description: "Get an address from a Buyer or Supplier",
+      inputSchema: z.object({
+        entityType: z.enum(["Buyer", "Supplier"]).describe("Entity type"),
+        entityId: z.string().describe("Entity ID"),
+        addressId: z.string().describe("Address ID"),
+      }),
+    },
+    async ({ entityType, entityId, addressId }) => {
+      try {
+        const path = entityType === "Buyer" 
+          ? `/v1/buyers/${entityId}/addresses/${addressId}` 
+          : `/v1/suppliers/${entityId}/addresses/${addressId}`;
+        const data = await client.request("GET", path);
+        return ok(data);
+      } catch (e) {
+        return err(e);
+      }
+    }
+  );
+
+  server.registerTool(
+    "ordercloud.addresses.create",
+    {
+      description: "Create an address for a Buyer or Supplier",
+      inputSchema: z.object({
+        entityType: z.enum(["Buyer", "Supplier"]).describe("Entity type"),
+        entityId: z.string().describe("Entity ID"),
+        address: z.object({
+          ID: z.string().optional(),
+          AddressName: z.string().optional(),
+          Street1: z.string(),
+          Street2: z.string().optional(),
+          City: z.string().optional(),
+          State: z.string().optional(),
+          Zip: z.string().optional(),
+          Country: z.string().optional(),
+          xp: z.record(z.unknown()).optional(),
+        }).describe("Address object to create"),
+      }),
+    },
+    async ({ entityType, entityId, address }) => {
+      try {
+        const path = entityType === "Buyer" 
+          ? `/v1/buyers/${entityId}/addresses` 
+          : `/v1/suppliers/${entityId}/addresses`;
+        const data = await client.request("POST", path, undefined, address);
+        return ok(data);
+      } catch (e) {
+        return err(e);
+      }
+    }
+  );
+
+  server.registerTool(
+    "ordercloud.addresses.patch",
+    {
+      description: "Partially update an address",
+      inputSchema: z.object({
+        entityType: z.enum(["Buyer", "Supplier"]).describe("Entity type"),
+        entityId: z.string().describe("Entity ID"),
+        addressId: z.string().describe("Address ID"),
+        patch: z.record(z.unknown()).describe("Fields to update"),
+      }),
+    },
+    async ({ entityType, entityId, addressId, patch }) => {
+      try {
+        const path = entityType === "Buyer" 
+          ? `/v1/buyers/${entityId}/addresses/${addressId}` 
+          : `/v1/suppliers/${entityId}/addresses/${addressId}`;
+        const data = await client.request("PATCH", path, undefined, patch);
+        return ok(data);
+      } catch (e) {
+        return err(e);
+      }
+    }
+  );
+
+  server.registerTool(
+    "ordercloud.addresses.delete",
+    {
+      description: "Delete an address",
+      inputSchema: z.object({
+        entityType: z.enum(["Buyer", "Supplier"]).describe("Entity type"),
+        entityId: z.string().describe("Entity ID"),
+        addressId: z.string().describe("Address ID"),
+      }),
+    },
+    async ({ entityType, entityId, addressId }) => {
+      try {
+        const path = entityType === "Buyer" 
+          ? `/v1/buyers/${entityId}/addresses/${addressId}` 
+          : `/v1/suppliers/${entityId}/addresses/${addressId}`;
+        await client.request("DELETE", path);
+        return ok({ deleted: true, addressId, entityType, entityId });
+      } catch (e) {
+        return err(e);
+      }
+    }
+  );
+
+  // ── I) Price Schedules ──
+
+  server.registerTool(
+    "ordercloud.priceSchedules.list",
+    {
+      description: "List OrderCloud price schedules",
+      inputSchema: z.object({
+        productId: z.string().optional().describe("Filter by product ID"),
+        page: z.number().int().min(1).optional(),
+        pageSize: z.number().int().min(1).max(100).optional(),
+      }),
+    },
+    async ({ productId, page, pageSize }) => {
+      try {
+        const q: Record<string, string | number | undefined> = {};
+        if (productId) q["productID"] = productId;
+        if (page) q["page"] = page;
+        if (pageSize) q["pageSize"] = pageSize;
+        const data = await client.request<OcList>("GET", "/v1/priceSchedules", q);
+        return ok(normalizePagination(data));
+      } catch (e) {
+        return err(e);
+      }
+    }
+  );
+
+  server.registerTool(
+    "ordercloud.priceSchedules.get",
+    {
+      description: "Get a price schedule by ID",
+      inputSchema: z.object({
+        priceScheduleId: z.string().describe("The price schedule ID"),
+      }),
+    },
+    async ({ priceScheduleId }) => {
+      try {
+        const data = await client.request("GET", `/v1/priceSchedules/${priceScheduleId}`);
+        return ok(data);
+      } catch (e) {
+        return err(e);
+      }
+    }
+  );
+
+  server.registerTool(
+    "ordercloud.priceSchedules.create",
+    {
+      description: "Create a new price schedule",
+      inputSchema: z.object({
+        priceSchedule: z.object({
+          ID: z.string().describe("Unique price schedule ID"),
+          Name: z.string().describe("Price schedule name"),
+          ProductID: z.string().describe("Associated product ID"),
+          PriceBreaks: z.array(z.object({
+            Quantity: z.number().int(),
+            Price: z.number(),
+            SalePrice: z.number().optional(),
+          })).optional(),
+          xp: z.record(z.unknown()).optional(),
+        }).describe("Price schedule object to create"),
+      }),
+    },
+    async ({ priceSchedule }) => {
+      try {
+        const data = await client.request("POST", "/v1/priceSchedules", undefined, priceSchedule);
+        return ok(data);
+      } catch (e) {
+        return err(e);
+      }
+    }
+  );
+
+  server.registerTool(
+    "ordercloud.priceSchedules.patch",
+    {
+      description: "Partially update a price schedule",
+      inputSchema: z.object({
+        priceScheduleId: z.string().describe("The price schedule ID"),
+        patch: z.record(z.unknown()).describe("Fields to update"),
+      }),
+    },
+    async ({ priceScheduleId, patch }) => {
+      try {
+        const data = await client.request("PATCH", `/v1/priceSchedules/${priceScheduleId}`, undefined, patch);
+        return ok(data);
+      } catch (e) {
+        return err(e);
+      }
+    }
+  );
+
+  server.registerTool(
+    "ordercloud.priceSchedules.addPriceBreak",
+    {
+      description: "Add a price break to a price schedule",
+      inputSchema: z.object({
+        priceScheduleId: z.string().describe("The price schedule ID"),
+        priceBreak: z.object({
+          Quantity: z.number().int().describe("Minimum quantity"),
+          Price: z.number().describe("Unit price"),
+          SalePrice: z.number().optional().describe("Sale price"),
+        }).describe("Price break to add"),
+      }),
+    },
+    async ({ priceScheduleId, priceBreak }) => {
+      try {
+        const data = await client.request("POST", `/v1/priceSchedules/${priceScheduleId}/pricebreaks`, undefined, priceBreak);
+        return ok(data);
+      } catch (e) {
+        return err(e);
+      }
+    }
+  );
+
+  // ── J) Promotions ──
+
+  server.registerTool(
+    "ordercloud.promotions.search",
+    {
+      description: "Search OrderCloud promotions",
+      inputSchema: z.object({
+        search: z.string().optional(),
+        filters: z.record(z.string()).optional(),
+        page: z.number().int().min(1).optional(),
+        pageSize: z.number().int().min(1).max(100).optional(),
+      }),
+    },
+    async (params) => {
+      try {
+        const q = buildListQuery(params);
+        const data = await client.request<OcList>("GET", "/v1/promotions", q);
+        return ok(normalizePagination(data));
+      } catch (e) {
+        return err(e);
+      }
+    }
+  );
+
+  server.registerTool(
+    "ordercloud.promotions.get",
+    {
+      description: "Get a promotion by ID",
+      inputSchema: z.object({
+        promotionId: z.string().describe("The promotion ID"),
+      }),
+    },
+    async ({ promotionId }) => {
+      try {
+        const data = await client.request("GET", `/v1/promotions/${promotionId}`);
+        return ok(data);
+      } catch (e) {
+        return err(e);
+      }
+    }
+  );
+
+  server.registerTool(
+    "ordercloud.promotions.create",
+    {
+      description: "Create a new promotion",
+      inputSchema: z.object({
+        promotion: z.object({
+          ID: z.string().describe("Unique promotion ID"),
+          Code: z.string().describe("Promotion code"),
+          Name: z.string().describe("Promotion name"),
+          Description: z.string().optional(),
+          Active: z.boolean().optional().default(true),
+          StartDate: z.string().optional(),
+          ExpirationDate: z.string().optional(),
+          xp: z.record(z.unknown()).optional(),
+        }).describe("Promotion object to create"),
+      }),
+    },
+    async ({ promotion }) => {
+      try {
+        const data = await client.request("POST", "/v1/promotions", undefined, promotion);
+        return ok(data);
+      } catch (e) {
+        return err(e);
+      }
+    }
+  );
+
+  server.registerTool(
+    "ordercloud.promotions.patch",
+    {
+      description: "Partially update a promotion",
+      inputSchema: z.object({
+        promotionId: z.string().describe("The promotion ID"),
+        patch: z.record(z.unknown()).describe("Fields to update"),
+      }),
+    },
+    async ({ promotionId, patch }) => {
+      try {
+        const data = await client.request("PATCH", `/v1/promotions/${promotionId}`, undefined, patch);
+        return ok(data);
+      } catch (e) {
+        return err(e);
+      }
+    }
+  );
+
+  server.registerTool(
+    "ordercloud.promotions.delete",
+    {
+      description: "Delete a promotion",
+      inputSchema: z.object({
+        promotionId: z.string().describe("The promotion ID"),
+      }),
+    },
+    async ({ promotionId }) => {
+      try {
+        await client.request("DELETE", `/v1/promotions/${promotionId}`);
+        return ok({ deleted: true, promotionId });
+      } catch (e) {
+        return err(e);
+      }
+    }
+  );
+
+  server.registerTool(
+    "ordercloud.promotions.assignToBuyer",
+    {
+      description: "Assign a promotion to a buyer",
+      inputSchema: z.object({
+        promotionId: z.string().describe("The promotion ID"),
+        buyerId: z.string().describe("The buyer ID"),
+      }),
+    },
+    async ({ promotionId, buyerId }) => {
+      try {
+        const data = await client.request("POST", `/v1/promotions/${promotionId}/assignments`, undefined, { BuyerID: buyerId });
+        return ok(data);
+      } catch (e) {
+        return err(e);
+      }
+    }
+  );
+
+  // ── K) Shipments ──
+
+  server.registerTool(
+    "ordercloud.shipments.search",
+    {
+      description: "Search OrderCloud shipments",
+      inputSchema: z.object({
+        direction: z.enum(["Incoming", "Outgoing"]).optional().describe("Shipment direction"),
+        search: z.string().optional(),
+        filters: z.record(z.string()).optional(),
+        page: z.number().int().min(1).optional(),
+        pageSize: z.number().int().min(1).max(100).optional(),
+      }),
+    },
+    async (params) => {
+      try {
+        const q = buildListQuery(params);
+        const data = await client.request<OcList>("GET", "/v1/shipments", q);
+        return ok(normalizePagination(data));
+      } catch (e) {
+        return err(e);
+      }
+    }
+  );
+
+  server.registerTool(
+    "ordercloud.shipments.get",
+    {
+      description: "Get a shipment by ID",
+      inputSchema: z.object({
+        shipmentId: z.string().describe("The shipment ID"),
+      }),
+    },
+    async ({ shipmentId }) => {
+      try {
+        const data = await client.request("GET", `/v1/shipments/${shipmentId}`);
+        return ok(data);
+      } catch (e) {
+        return err(e);
+      }
+    }
+  );
+
+  server.registerTool(
+    "ordercloud.shipments.create",
+    {
+      description: "Create a new shipment",
+      inputSchema: z.object({
+        shipment: z.object({
+          ID: z.string().optional(),
+          Shipper: z.string().optional(),
+          TrackingNumber: z.string().optional(),
+          DateShipped: z.string().optional(),
+          DateDelivered: z.string().optional(),
+          xp: z.record(z.unknown()).optional(),
+        }).describe("Shipment object to create"),
+      }),
+    },
+    async ({ shipment }) => {
+      try {
+        const data = await client.request("POST", "/v1/shipments", undefined, shipment);
+        return ok(data);
+      } catch (e) {
+        return err(e);
+      }
+    }
+  );
+
+  server.registerTool(
+    "ordercloud.shipments.patch",
+    {
+      description: "Partially update a shipment",
+      inputSchema: z.object({
+        shipmentId: z.string().describe("The shipment ID"),
+        patch: z.record(z.unknown()).describe("Fields to update"),
+      }),
+    },
+    async ({ shipmentId, patch }) => {
+      try {
+        const data = await client.request("PATCH", `/v1/shipments/${shipmentId}`, undefined, patch);
+        return ok(data);
+      } catch (e) {
+        return err(e);
+      }
+    }
+  );
+
+  server.registerTool(
+    "ordercloud.shipments.listForOrder",
+    {
+      description: "List shipments for an order",
+      inputSchema: z.object({
+        direction: z.enum(["Incoming", "Outgoing"]).describe("Order direction"),
+        orderId: z.string().describe("The order ID"),
+      }),
+    },
+    async ({ direction, orderId }) => {
+      try {
+        const data = await client.request<OcList>("GET", `/v1/orders/${direction}/${orderId}/shipments`);
+        return ok(normalizePagination(data));
+      } catch (e) {
+        return err(e);
+      }
+    }
+  );
+
+  server.registerTool(
+    "ordercloud.shipments.addLineItem",
+    {
+      description: "Add a line item to a shipment",
+      inputSchema: z.object({
+        shipmentId: z.string().describe("The shipment ID"),
+        lineItem: z.object({
+          OrderID: z.string().describe("Order ID"),
+          LineItemID: z.string().describe("Line item ID"),
+          Quantity: z.number().int().describe("Quantity shipped"),
+        }).describe("Line item to add"),
+      }),
+    },
+    async ({ shipmentId, lineItem }) => {
+      try {
+        const data = await client.request("POST", `/v1/shipments/${shipmentId}/items`, undefined, lineItem);
+        return ok(data);
+      } catch (e) {
+        return err(e);
+      }
+    }
+  );
+
+  // ── L) Payments ──
+
+  server.registerTool(
+    "ordercloud.payments.listForOrder",
+    {
+      description: "List payments for an order",
+      inputSchema: z.object({
+        direction: z.enum(["Incoming", "Outgoing"]).describe("Order direction"),
+        orderId: z.string().describe("The order ID"),
+      }),
+    },
+    async ({ direction, orderId }) => {
+      try {
+        const data = await client.request<OcList>("GET", `/v1/orders/${direction}/${orderId}/payments`);
+        return ok(normalizePagination(data));
+      } catch (e) {
+        return err(e);
+      }
+    }
+  );
+
+  server.registerTool(
+    "ordercloud.payments.get",
+    {
+      description: "Get a payment by ID",
+      inputSchema: z.object({
+        direction: z.enum(["Incoming", "Outgoing"]).describe("Order direction"),
+        orderId: z.string().describe("The order ID"),
+        paymentId: z.string().describe("The payment ID"),
+      }),
+    },
+    async ({ direction, orderId, paymentId }) => {
+      try {
+        const data = await client.request("GET", `/v1/orders/${direction}/${orderId}/payments/${paymentId}`);
+        return ok(data);
+      } catch (e) {
+        return err(e);
+      }
+    }
+  );
+
+  server.registerTool(
+    "ordercloud.payments.create",
+    {
+      description: "Create a payment for an order",
+      inputSchema: z.object({
+        direction: z.enum(["Incoming", "Outgoing"]).describe("Order direction"),
+        orderId: z.string().describe("The order ID"),
+        payment: z.object({
+          Type: z.string().describe("Payment type"),
+          Amount: z.number().optional(),
+          xp: z.record(z.unknown()).optional(),
+        }).describe("Payment object to create"),
+      }),
+    },
+    async ({ direction, orderId, payment }) => {
+      try {
+        const data = await client.request("POST", `/v1/orders/${direction}/${orderId}/payments`, undefined, payment);
+        return ok(data);
+      } catch (e) {
+        return err(e);
+      }
+    }
+  );
+
+  server.registerTool(
+    "ordercloud.payments.patch",
+    {
+      description: "Partially update a payment",
+      inputSchema: z.object({
+        direction: z.enum(["Incoming", "Outgoing"]).describe("Order direction"),
+        orderId: z.string().describe("The order ID"),
+        paymentId: z.string().describe("The payment ID"),
+        patch: z.record(z.unknown()).describe("Fields to update"),
+      }),
+    },
+    async ({ direction, orderId, paymentId, patch }) => {
+      try {
+        const data = await client.request("PATCH", `/v1/orders/${direction}/${orderId}/payments/${paymentId}`, undefined, patch);
+        return ok(data);
+      } catch (e) {
+        return err(e);
+      }
+    }
+  );
+
+  server.registerTool(
+    "ordercloud.payments.transactions.list",
+    {
+      description: "List transactions for a payment",
+      inputSchema: z.object({
+        direction: z.enum(["Incoming", "Outgoing"]).describe("Order direction"),
+        orderId: z.string().describe("The order ID"),
+        paymentId: z.string().describe("The payment ID"),
+      }),
+    },
+    async ({ direction, orderId, paymentId }) => {
+      try {
+        const data = await client.request<OcList>("GET", `/v1/orders/${direction}/${orderId}/payments/${paymentId}/transactions`);
+        return ok(normalizePagination(data));
+      } catch (e) {
+        return err(e);
+      }
+    }
+  );
+
+  // ── M) Line Items ──
+
+  server.registerTool(
+    "ordercloud.lineItems.list",
+    {
+      description: "List line items for an order",
+      inputSchema: z.object({
+        direction: z.enum(["Incoming", "Outgoing"]).describe("Order direction"),
+        orderId: z.string().describe("The order ID"),
+        search: z.string().optional(),
+        filters: z.record(z.string()).optional(),
+        page: z.number().int().min(1).optional(),
+        pageSize: z.number().int().min(1).max(100).optional(),
+      }),
+    },
+    async (params) => {
+      try {
+        const q = buildListQuery(params);
+        const data = await client.request<OcList>("GET", `/v1/orders/${params.direction}/${params.orderId}/lineitems`, q);
+        return ok(normalizePagination(data));
+      } catch (e) {
+        return err(e);
+      }
+    }
+  );
+
+  server.registerTool(
+    "ordercloud.lineItems.get",
+    {
+      description: "Get a line item by ID",
+      inputSchema: z.object({
+        direction: z.enum(["Incoming", "Outgoing"]).describe("Order direction"),
+        orderId: z.string().describe("The order ID"),
+        lineItemId: z.string().describe("The line item ID"),
+      }),
+    },
+    async ({ direction, orderId, lineItemId }) => {
+      try {
+        const data = await client.request("GET", `/v1/orders/${direction}/${orderId}/lineitems/${lineItemId}`);
+        return ok(data);
+      } catch (e) {
+        return err(e);
+      }
+    }
+  );
+
+  server.registerTool(
+    "ordercloud.lineItems.create",
+    {
+      description: "Add a line item to an order",
+      inputSchema: z.object({
+        direction: z.enum(["Incoming", "Outgoing"]).describe("Order direction"),
+        orderId: z.string().describe("The order ID"),
+        lineItem: z.object({
+          ProductID: z.string().describe("Product ID"),
+          Quantity: z.number().int().describe("Quantity"),
+          UnitPrice: z.number().optional(),
+          xp: z.record(z.unknown()).optional(),
+        }).describe("Line item to create"),
+      }),
+    },
+    async ({ direction, orderId, lineItem }) => {
+      try {
+        const data = await client.request("POST", `/v1/orders/${direction}/${orderId}/lineitems`, undefined, lineItem);
+        return ok(data);
+      } catch (e) {
+        return err(e);
+      }
+    }
+  );
+
+  server.registerTool(
+    "ordercloud.lineItems.patch",
+    {
+      description: "Partially update a line item",
+      inputSchema: z.object({
+        direction: z.enum(["Incoming", "Outgoing"]).describe("Order direction"),
+        orderId: z.string().describe("The order ID"),
+        lineItemId: z.string().describe("The line item ID"),
+        patch: z.record(z.unknown()).describe("Fields to update"),
+      }),
+    },
+    async ({ direction, orderId, lineItemId, patch }) => {
+      try {
+        const data = await client.request("PATCH", `/v1/orders/${direction}/${orderId}/lineitems/${lineItemId}`, undefined, patch);
+        return ok(data);
+      } catch (e) {
+        return err(e);
+      }
+    }
+  );
+
+  server.registerTool(
+    "ordercloud.lineItems.delete",
+    {
+      description: "Delete a line item from an order",
+      inputSchema: z.object({
+        direction: z.enum(["Incoming", "Outgoing"]).describe("Order direction"),
+        orderId: z.string().describe("The order ID"),
+        lineItemId: z.string().describe("The line item ID"),
+      }),
+    },
+    async ({ direction, orderId, lineItemId }) => {
+      try {
+        await client.request("DELETE", `/v1/orders/${direction}/${orderId}/lineitems/${lineItemId}`);
+        return ok({ deleted: true, lineItemId, orderId });
+      } catch (e) {
+        return err(e);
+      }
+    }
+  );
 }
