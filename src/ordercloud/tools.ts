@@ -9,7 +9,6 @@ import { z } from "zod";
 import { OrderCloudClient } from "./client.js";
 import { ok, err } from "./helpers/index.js";
 
-// Import resource modules
 import { registerProductTools } from "./resources/products.js";
 import { registerCatalogTools } from "./resources/catalogs.js";
 import { registerCategoryTools } from "./resources/categories.js";
@@ -26,12 +25,9 @@ import { registerPaymentTools } from "./resources/payments.js";
 import { registerLineItemTools } from "./resources/lineItems.js";
 import { registerCostCenterTools } from "./resources/costCenters.js";
 
-// ─── Tool Registration ──────────────────────────────────────────────────────
+// Tool Registration
 
 export function registerTools(server: McpServer, client: OrderCloudClient): void {
-  // ── A) Health & Auth ──
-  // Keep ping inline as it's a simple tool
-
   server.registerTool(
     "ordercloud.ping",
     {
@@ -54,48 +50,33 @@ export function registerTools(server: McpServer, client: OrderCloudClient): void
     }
   );
 
-  // ── B) Products ──
   registerProductTools(server, client);
 
-  // ── C) Catalogs ──
   registerCatalogTools(server, client);
 
-  // ── D) Categories ──
   registerCategoryTools(server, client);
 
-  // ── E) Buyers & Users ──
   registerBuyerTools(server, client);
 
-  // ── F) Orders ──
   registerOrderTools(server, client);
 
-  // ── G) XP Helpers ──
   registerXpTools(server, client);
 
-  // ── H) Suppliers ──
   registerSupplierTools(server, client);
 
-  // ── I) Addresses ──
   registerAddressTools(server, client);
 
-  // ── J) Price Schedules ──
   registerPriceScheduleTools(server, client);
 
-  // ── K) Specs & Variants ──
   registerSpecTools(server, client);
 
-  // ── L) Promotions ──
   registerPromotionTools(server, client);
 
-  // ── M) Shipments ──
   registerShipmentTools(server, client);
 
-  // ── N) Payments ──
   registerPaymentTools(server, client);
 
-  // ── O) Line Items ──
   registerLineItemTools(server, client);
 
-  // ── P) Cost Centers & Spending Accounts ──
   registerCostCenterTools(server, client);
 }

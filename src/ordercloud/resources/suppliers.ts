@@ -10,7 +10,6 @@ import { ok, err, buildListQuery, normalizePagination, OcList } from "../helpers
  * Register all supplier-related tools.
  */
 export function registerSupplierTools(server: McpServer, client: OrderCloudClient): void {
-  // ── Supplier Search ──
   server.registerTool(
     "ordercloud.suppliers.search",
     {
@@ -34,7 +33,6 @@ export function registerSupplierTools(server: McpServer, client: OrderCloudClien
     }
   );
 
-  // ── Supplier Get ──
   server.registerTool(
     "ordercloud.suppliers.get",
     {
@@ -53,7 +51,6 @@ export function registerSupplierTools(server: McpServer, client: OrderCloudClien
     }
   );
 
-  // ── Supplier Create ──
   server.registerTool(
     "ordercloud.suppliers.create",
     {
@@ -78,7 +75,6 @@ export function registerSupplierTools(server: McpServer, client: OrderCloudClien
     }
   );
 
-  // ── Supplier Patch ──
   server.registerTool(
     "ordercloud.suppliers.patch",
     {
@@ -98,7 +94,6 @@ export function registerSupplierTools(server: McpServer, client: OrderCloudClien
     }
   );
 
-  // ── Supplier Delete ──
   server.registerTool(
     "ordercloud.suppliers.delete",
     {

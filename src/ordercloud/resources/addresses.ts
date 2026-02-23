@@ -10,7 +10,6 @@ import { ok, err, buildListQuery, normalizePagination, OcList } from "../helpers
  * Register all address-related tools.
  */
 export function registerAddressTools(server: McpServer, client: OrderCloudClient): void {
-  // ── Address List for Entity ──
   server.registerTool(
     "ordercloud.addresses.listForEntity",
     {
@@ -47,7 +46,6 @@ export function registerAddressTools(server: McpServer, client: OrderCloudClient
     }
   );
 
-  // ── Address Get ──
   server.registerTool(
     "ordercloud.addresses.get",
     {
@@ -79,7 +77,6 @@ export function registerAddressTools(server: McpServer, client: OrderCloudClient
     }
   );
 
-  // ── Address Create ──
   server.registerTool(
     "ordercloud.addresses.create",
     {
@@ -125,7 +122,6 @@ export function registerAddressTools(server: McpServer, client: OrderCloudClient
     }
   );
 
-  // ── Address Patch ──
   server.registerTool(
     "ordercloud.addresses.patch",
     {
@@ -158,7 +154,6 @@ export function registerAddressTools(server: McpServer, client: OrderCloudClient
     }
   );
 
-  // ── Address Delete ──
   server.registerTool(
     "ordercloud.addresses.delete",
     {

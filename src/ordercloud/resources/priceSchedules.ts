@@ -10,7 +10,6 @@ import { ok, err, buildListQuery, normalizePagination, OcList } from "../helpers
  * Register all price schedule-related tools.
  */
 export function registerPriceScheduleTools(server: McpServer, client: OrderCloudClient): void {
-  // ── Price Schedule List ──
   server.registerTool(
     "ordercloud.priceSchedules.list",
     {
@@ -35,7 +34,6 @@ export function registerPriceScheduleTools(server: McpServer, client: OrderCloud
     }
   );
 
-  // ── Price Schedule Get ──
   server.registerTool(
     "ordercloud.priceSchedules.get",
     {
@@ -54,7 +52,6 @@ export function registerPriceScheduleTools(server: McpServer, client: OrderCloud
     }
   );
 
-  // ── Price Schedule Create ──
   server.registerTool(
     "ordercloud.priceSchedules.create",
     {
@@ -86,7 +83,6 @@ export function registerPriceScheduleTools(server: McpServer, client: OrderCloud
     }
   );
 
-  // ── Price Schedule Patch ──
   server.registerTool(
     "ordercloud.priceSchedules.patch",
     {
@@ -106,7 +102,6 @@ export function registerPriceScheduleTools(server: McpServer, client: OrderCloud
     }
   );
 
-  // ── Price Schedule Add Price Break ──
   server.registerTool(
     "ordercloud.priceSchedules.addPriceBreak",
     {

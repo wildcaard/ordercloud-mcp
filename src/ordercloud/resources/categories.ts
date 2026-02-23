@@ -10,7 +10,6 @@ import { ok, err, buildListQuery, normalizePagination, OcList } from "../helpers
  * Register all category-related tools.
  */
 export function registerCategoryTools(server: McpServer, client: OrderCloudClient): void {
-  // ── Category Search ──
   server.registerTool(
     "ordercloud.categories.search",
     {
@@ -35,7 +34,6 @@ export function registerCategoryTools(server: McpServer, client: OrderCloudClien
     }
   );
 
-  // ── Category Get ──
   server.registerTool(
     "ordercloud.categories.get",
     {
@@ -55,7 +53,6 @@ export function registerCategoryTools(server: McpServer, client: OrderCloudClien
     }
   );
 
-  // ── Category Create ──
   server.registerTool(
     "ordercloud.categories.create",
     {
@@ -82,7 +79,6 @@ export function registerCategoryTools(server: McpServer, client: OrderCloudClien
     }
   );
 
-  // ── Category Patch ──
   server.registerTool(
     "ordercloud.categories.patch",
     {
@@ -103,7 +99,6 @@ export function registerCategoryTools(server: McpServer, client: OrderCloudClien
     }
   );
 
-  // ── Category Delete ──
   server.registerTool(
     "ordercloud.categories.delete",
     {

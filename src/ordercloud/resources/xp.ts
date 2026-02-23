@@ -10,7 +10,6 @@ import { ok, err, resolveResourcePath, validateXp, deepMerge } from "../helpers/
  * Register all XP (extended properties) related tools.
  */
 export function registerXpTools(server: McpServer, client: OrderCloudClient): void {
-  // ── XP Get ──
   server.registerTool(
     "ordercloud.xp.get",
     {
@@ -31,7 +30,6 @@ export function registerXpTools(server: McpServer, client: OrderCloudClient): vo
     }
   );
 
-  // ── XP Patch ──
   server.registerTool(
     "ordercloud.xp.patch",
     {
@@ -44,14 +42,11 @@ export function registerXpTools(server: McpServer, client: OrderCloudClient): vo
     },
     async ({ resourceType, identifiers, xpPatch }) => {
       try {
-        // Validate XP first
         validateXp(xpPatch);
         
-        // Get current XP
         const path = resolveResourcePath(resourceType, identifiers);
         const current = await client.request<{ xp?: Record<string, unknown> }>("GET", path);
         
-        // Merge and update
         const mergedXp = deepMerge(current.xp || {}, xpPatch);
         const data = await client.request("PATCH", path, undefined, { xp: mergedXp });
         

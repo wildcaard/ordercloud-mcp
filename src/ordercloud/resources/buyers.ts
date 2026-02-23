@@ -10,7 +10,6 @@ import { ok, err, buildListQuery, normalizePagination, OcList } from "../helpers
  * Register all buyer and user-related tools.
  */
 export function registerBuyerTools(server: McpServer, client: OrderCloudClient): void {
-  // ── Buyer Search ──
   server.registerTool(
     "ordercloud.buyers.search",
     {
@@ -34,7 +33,6 @@ export function registerBuyerTools(server: McpServer, client: OrderCloudClient):
     }
   );
 
-  // ── Buyer Get ──
   server.registerTool(
     "ordercloud.buyers.get",
     {
@@ -53,7 +51,6 @@ export function registerBuyerTools(server: McpServer, client: OrderCloudClient):
     }
   );
 
-  // ── Buyer Create ──
   server.registerTool(
     "ordercloud.buyers.create",
     {
@@ -77,7 +74,6 @@ export function registerBuyerTools(server: McpServer, client: OrderCloudClient):
     }
   );
 
-  // ── Buyer Patch ──
   server.registerTool(
     "ordercloud.buyers.patch",
     {
@@ -97,7 +93,6 @@ export function registerBuyerTools(server: McpServer, client: OrderCloudClient):
     }
   );
 
-  // ── Buyer Delete ──
   server.registerTool(
     "ordercloud.buyers.delete",
     {
@@ -116,7 +111,6 @@ export function registerBuyerTools(server: McpServer, client: OrderCloudClient):
     }
   );
 
-  // ── User Search ──
   server.registerTool(
     "ordercloud.users.search",
     {
@@ -141,7 +135,6 @@ export function registerBuyerTools(server: McpServer, client: OrderCloudClient):
     }
   );
 
-  // ── User Get ──
   server.registerTool(
     "ordercloud.users.get",
     {
@@ -161,7 +154,6 @@ export function registerBuyerTools(server: McpServer, client: OrderCloudClient):
     }
   );
 
-  // ── User Create ──
   server.registerTool(
     "ordercloud.users.create",
     {
@@ -190,7 +182,6 @@ export function registerBuyerTools(server: McpServer, client: OrderCloudClient):
     }
   );
 
-  // ── User Patch ──
   server.registerTool(
     "ordercloud.users.patch",
     {
@@ -211,7 +202,6 @@ export function registerBuyerTools(server: McpServer, client: OrderCloudClient):
     }
   );
 
-  // ── User Delete ──
   server.registerTool(
     "ordercloud.users.delete",
     {

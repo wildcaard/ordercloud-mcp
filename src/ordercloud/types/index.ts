@@ -2,11 +2,8 @@
  * Shared TypeScript types for OrderCloud MCP.
  */
 
-// Re-export helpers types
 export type { OcList } from "../helpers/index.js";
 export { normalizePagination, buildListQuery, resolveResourcePath, ResourceType } from "../helpers/index.js";
-
-// ─── API Configuration ───────────────────────────────────────────────────────
 
 /**
  * OrderCloud API configuration.
@@ -25,16 +22,12 @@ export interface OcConfig {
  */
 export type AuthMode = "client_credentials" | "token";
 
-// ─── API Error Types ─────────────────────────────────────────────────────────
-
 /**
  * OrderCloud error response body.
  */
 export interface OcErrorBody {
   Errors?: Array<{ ErrorCode: string; Message: string; Data?: unknown }>;
 }
-
-// ─── Common API Entities ─────────────────────────────────────────────────────
 
 /**
  * Product entity.

@@ -10,7 +10,6 @@ import { ok, err, buildListQuery, normalizePagination, OcList } from "../helpers
  * Register all order-related tools.
  */
 export function registerOrderTools(server: McpServer, client: OrderCloudClient): void {
-  // ── Order Search ──
   server.registerTool(
     "ordercloud.orders.search",
     {
@@ -46,7 +45,6 @@ export function registerOrderTools(server: McpServer, client: OrderCloudClient):
     }
   );
 
-  // ── Order Get ──
   server.registerTool(
     "ordercloud.orders.get",
     {
@@ -66,7 +64,6 @@ export function registerOrderTools(server: McpServer, client: OrderCloudClient):
     }
   );
 
-  // ── Order Create ──
   server.registerTool(
     "ordercloud.orders.create",
     {
@@ -91,7 +88,6 @@ export function registerOrderTools(server: McpServer, client: OrderCloudClient):
     }
   );
 
-  // ── Order Patch ──
   server.registerTool(
     "ordercloud.orders.patch",
     {
@@ -112,7 +108,6 @@ export function registerOrderTools(server: McpServer, client: OrderCloudClient):
     }
   );
 
-  // ── Order Delete ──
   server.registerTool(
     "ordercloud.orders.delete",
     {
@@ -132,7 +127,6 @@ export function registerOrderTools(server: McpServer, client: OrderCloudClient):
     }
   );
 
-  // ── Order Get Worksheet ──
   server.registerTool(
     "ordercloud.orders.getWorksheet",
     {
@@ -160,7 +154,6 @@ export function registerOrderTools(server: McpServer, client: OrderCloudClient):
     }
   );
 
-  // ── Order Submit ──
   server.registerTool(
     "ordercloud.orders.submit",
     {

@@ -10,7 +10,6 @@ import { ok, err, normalizePagination, OcList } from "../helpers/index.js";
  * Register all catalog-related tools.
  */
 export function registerCatalogTools(server: McpServer, client: OrderCloudClient): void {
-  // ── Catalog List ──
   server.registerTool(
     "ordercloud.catalogs.list",
     {
@@ -31,7 +30,6 @@ export function registerCatalogTools(server: McpServer, client: OrderCloudClient
     }
   );
 
-  // ── Catalog Get ──
   server.registerTool(
     "ordercloud.catalogs.get",
     {
@@ -50,7 +48,6 @@ export function registerCatalogTools(server: McpServer, client: OrderCloudClient
     }
   );
 
-  // ── Catalog Create ──
   server.registerTool(
     "ordercloud.catalogs.create",
     {
@@ -75,7 +72,6 @@ export function registerCatalogTools(server: McpServer, client: OrderCloudClient
     }
   );
 
-  // ── Catalog Patch ──
   server.registerTool(
     "ordercloud.catalogs.patch",
     {
@@ -95,7 +91,6 @@ export function registerCatalogTools(server: McpServer, client: OrderCloudClient
     }
   );
 
-  // ── Catalog Delete ──
   server.registerTool(
     "ordercloud.catalogs.delete",
     {

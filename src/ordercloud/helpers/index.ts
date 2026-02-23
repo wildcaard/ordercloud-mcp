@@ -3,8 +3,6 @@
  */
 import { OrderCloudError } from "../client.js";
 
-// ─── Response Formatters ────────────────────────────────────────────────────
-
 /**
  * Format a successful tool response.
  */
@@ -30,8 +28,6 @@ export function err(e: unknown) {
   const message = e instanceof Error ? e.message : String(e);
   return { content: [{ type: "text" as const, text: JSON.stringify({ ok: false, error: { message } }, null, 2) }], isError: true };
 }
-
-// ─── Pagination Helpers ──────────────────────────────────────────────────────
 
 /**
  * OrderCloud paginated list response structure.
@@ -79,8 +75,6 @@ export function buildListQuery(params: {
   return q;
 }
 
-// ─── XP Helpers ──────────────────────────────────────────────────────────────
-
 const MAX_XP_SIZE = 65536; // 64KB
 
 /**
@@ -115,8 +109,6 @@ export function deepMerge(target: Record<string, unknown>, source: Record<string
   }
   return result;
 }
-
-// ─── Resource Path Resolver ──────────────────────────────────────────────────
 
 /**
  * Supported resource types for XP operations.
