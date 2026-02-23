@@ -19,6 +19,12 @@ import { registerXpTools } from "./resources/xp.js";
 import { registerSupplierTools } from "./resources/suppliers.js";
 import { registerAddressTools } from "./resources/addresses.js";
 import { registerPriceScheduleTools } from "./resources/priceSchedules.js";
+import { registerSpecTools } from "./resources/specs.js";
+import { registerPromotionTools } from "./resources/promotions.js";
+import { registerShipmentTools } from "./resources/shipments.js";
+import { registerPaymentTools } from "./resources/payments.js";
+import { registerLineItemTools } from "./resources/lineItems.js";
+import { registerCostCenterTools } from "./resources/costCenters.js";
 
 // ─── Tool Registration ──────────────────────────────────────────────────────
 
@@ -74,4 +80,22 @@ export function registerTools(server: McpServer, client: OrderCloudClient): void
 
   // ── J) Price Schedules ──
   registerPriceScheduleTools(server, client);
+
+  // ── K) Specs & Variants ──
+  registerSpecTools(server, client);
+
+  // ── L) Promotions ──
+  registerPromotionTools(server, client);
+
+  // ── M) Shipments ──
+  registerShipmentTools(server, client);
+
+  // ── N) Payments ──
+  registerPaymentTools(server, client);
+
+  // ── O) Line Items ──
+  registerLineItemTools(server, client);
+
+  // ── P) Cost Centers & Spending Accounts ──
+  registerCostCenterTools(server, client);
 }
