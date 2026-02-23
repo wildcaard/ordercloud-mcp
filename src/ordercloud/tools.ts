@@ -16,6 +16,9 @@ import { registerCategoryTools } from "./resources/categories.js";
 import { registerBuyerTools } from "./resources/buyers.js";
 import { registerOrderTools } from "./resources/orders.js";
 import { registerXpTools } from "./resources/xp.js";
+import { registerSupplierTools } from "./resources/suppliers.js";
+import { registerAddressTools } from "./resources/addresses.js";
+import { registerPriceScheduleTools } from "./resources/priceSchedules.js";
 
 // ─── Tool Registration ──────────────────────────────────────────────────────
 
@@ -62,4 +65,13 @@ export function registerTools(server: McpServer, client: OrderCloudClient): void
 
   // ── G) XP Helpers ──
   registerXpTools(server, client);
+
+  // ── H) Suppliers ──
+  registerSupplierTools(server, client);
+
+  // ── I) Addresses ──
+  registerAddressTools(server, client);
+
+  // ── J) Price Schedules ──
+  registerPriceScheduleTools(server, client);
 }
