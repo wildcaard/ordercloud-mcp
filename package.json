@@ -4,16 +4,23 @@
   "description": "MCP Server for Sitecore OrderCloud admin operations",
   "type": "module",
   "main": "dist/index.js",
+  "exports": {
+    ".": "./dist/index.js"
+  },
   "scripts": {
     "build": "tsc",
     "start": "node dist/index.js",
-    "dev": "tsc --watch"
+    "dev": "tsc --watch",
+    "test": "echo \"No tests specified\" && exit 0"
   },
   "keywords": [
     "mcp",
     "ordercloud",
-    "sitecore"
+    "sitecore",
+    "modelcontextprotocol",
+    "claude"
   ],
+  "author": "",
   "license": "MIT",
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.12.1",
@@ -26,5 +33,12 @@
   },
   "engines": {
     "node": ">=20"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/wildcaard/ordercloud-mcp.git"
+  },
+  "bugs": {
+    "url": "https://github.com/wildcaard/ordercloud-mcp/issues"
   }
 }
