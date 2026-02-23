@@ -122,4 +122,65 @@ export function registerProductTools(server: McpServer, client: OrderCloudClient
       }
     }
   );
+
+  // ── Product Set Default Price ──
+  server.registerTool(
+    "ordercloud.products.setDefaultPrice",
+    {
+      description: "Set the default price for a product by creating or updating a price schedule",
+      inputSchema: z.object({
+        productId: z.string().describe("The product ID"),
+        price: z.number().describe("Default price to set"),
+        currency: z.string().optional().describe("Currency code (default: USD)"),
+        salePrice: z.number().optional().describe("Optional sale price"),
+      }),
+    },
+    async ({ productId, price, currency = "USD", salePrice }) => {
+      try {
+        // First, try to get existing price schedule for this product
+        const existing = await client.request<OcList<{ ID: string }>>("GET", "/v1/priceSchedules", { ProductID: productId });
+        
+        if (existing.Items && existing.Items.length > 0) {
+          // Update existing price schedule - delete existing price breaks first, then add new one
+          const priceScheduleId = existing.Items[0].ID;
+          
+          // Delete all existing price breaks
+          await client.request("DELETE", `/v1/priceSchedules/${priceScheduleId}/pricebreaks`);
+          
+          // Add new price break
+          const newPriceBreak = { Quantity: 1, Price: price };
+          if (salePrice !== undefined) {
+            (newPriceBreak as Record<string, unknown>).SalePrice = salePrice;
+          }
+          
+          const data = await client.request("POST", `/v1/priceSchedules/${priceScheduleId}/pricebreaks`, undefined, newPriceBreak);
+          return ok({ updated: true, priceScheduleId: priceScheduleId, data });
+        } else {
+          // Create new price schedule
+          const newPriceSchedule = {
+            ID: `${productId}-default`,
+            Name: `${productId} Default Price`,
+            ProductID: productId,
+            Currency: currency,
+            PriceBreaks: [{
+              Quantity: 1,
+              Price: price,
+              ...(salePrice !== undefined ? { SalePrice: salePrice } : {}),
+            }],
+          };
+          
+          const data = await client.request("POST", "/v1/priceSchedules", undefined, newPriceSchedule);
+          
+          // Update product to use this price schedule
+          await client.request("PATCH", `/v1/products/${productId}`, undefined, { 
+            DefaultPriceScheduleID: newPriceSchedule.ID 
+          });
+          
+          return ok({ created: true, priceScheduleId: newPriceSchedule.ID, data });
+        }
+      } catch (e) {
+        return err(e);
+      }
+    }
+  );
 }
