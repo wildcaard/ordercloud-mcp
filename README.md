@@ -1,5 +1,10 @@
 # ordercloud-mcp
 
+[![npm version](https://img.shields.io/npm/v/ordercloud-mcp.svg)](https://www.npmjs.com/package/ordercloud-mcp)
+[![npm license](https://img.shields.io/npm/l/ordercloud-mcp.svg)](https://github.com/wildcaard/ordercloud-mcp/blob/main/LICENSE)
+[![Node.js Version](https://img.shields.io/node/v/ordercloud-mcp.svg)](https://nodejs.org/)
+[![Build Status](https://github.com/wildcaard/ordercloud-mcp/actions/workflows/ci.yml/badge.svg)](https://github.com/wildcaard/ordercloud-mcp/actions)
+
 MCP Server for Sitecore OrderCloud exposes admin operations as typed MCP tools for Claude Code and other MCP clients.
 
 ## Quick Start
