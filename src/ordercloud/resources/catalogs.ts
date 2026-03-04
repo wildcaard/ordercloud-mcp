@@ -5,6 +5,7 @@ import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
 import { OrderCloudClient } from "../client.js";
 import { ok, err, normalizePagination, OcList } from "../helpers/index.js";
+import { recordAudit, sanitizeForAudit } from "../helpers/audit.js";
 
 /**
  * Register all catalog-related tools.
@@ -63,10 +64,13 @@ export function registerCatalogTools(server: McpServer, client: OrderCloudClient
       }),
     },
     async ({ catalog }) => {
+      const params = { catalog };
       try {
         const data = await client.request("POST", "/v1/catalogs", undefined, catalog);
+        recordAudit({ operation: "create", toolName: "ordercloud.catalogs.create", resourceType: "Catalog", resourceId: catalog.ID, paramsSanitized: sanitizeForAudit(params), success: true });
         return ok(data);
       } catch (e) {
+        recordAudit({ operation: "create", toolName: "ordercloud.catalogs.create", resourceType: "Catalog", resourceId: catalog.ID, paramsSanitized: sanitizeForAudit(params), success: false, errorMessage: e instanceof Error ? e.message : String(e) });
         return err(e);
       }
     }
@@ -82,10 +86,13 @@ export function registerCatalogTools(server: McpServer, client: OrderCloudClient
       }),
     },
     async ({ catalogId, patch }) => {
+      const params = { catalogId, patch };
       try {
         const data = await client.request("PATCH", `/v1/catalogs/${catalogId}`, undefined, patch);
+        recordAudit({ operation: "update", toolName: "ordercloud.catalogs.patch", resourceType: "Catalog", resourceId: catalogId, paramsSanitized: sanitizeForAudit(params), success: true });
         return ok(data);
       } catch (e) {
+        recordAudit({ operation: "update", toolName: "ordercloud.catalogs.patch", resourceType: "Catalog", resourceId: catalogId, paramsSanitized: sanitizeForAudit(params), success: false, errorMessage: e instanceof Error ? e.message : String(e) });
         return err(e);
       }
     }
@@ -100,10 +107,13 @@ export function registerCatalogTools(server: McpServer, client: OrderCloudClient
       }),
     },
     async ({ catalogId }) => {
+      const params = { catalogId };
       try {
         await client.request("DELETE", `/v1/catalogs/${catalogId}`);
+        recordAudit({ operation: "delete", toolName: "ordercloud.catalogs.delete", resourceType: "Catalog", resourceId: catalogId, paramsSanitized: sanitizeForAudit(params), success: true });
         return ok({ deleted: true, catalogId });
       } catch (e) {
+        recordAudit({ operation: "delete", toolName: "ordercloud.catalogs.delete", resourceType: "Catalog", resourceId: catalogId, paramsSanitized: sanitizeForAudit(params), success: false, errorMessage: e instanceof Error ? e.message : String(e) });
         return err(e);
       }
     }

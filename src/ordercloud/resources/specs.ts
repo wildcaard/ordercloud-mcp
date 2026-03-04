@@ -5,6 +5,7 @@ import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
 import { OrderCloudClient } from "../client.js";
 import { ok, err, buildListQuery, normalizePagination, OcList } from "../helpers/index.js";
+import { recordAudit, sanitizeForAudit } from "../helpers/audit.js";
 
 /**
  * Spec entity.
@@ -96,10 +97,13 @@ export function registerSpecTools(server: McpServer, client: OrderCloudClient): 
       }),
     },
     async ({ spec }) => {
+      const params = { spec };
       try {
         const data = await client.request<Spec>("POST", "/v1/specs", undefined, spec);
+        recordAudit({ operation: "create", toolName: "ordercloud.specs.create", resourceType: "Spec", resourceId: spec.ID, paramsSanitized: sanitizeForAudit(params), success: true });
         return ok(data);
       } catch (e) {
+        recordAudit({ operation: "create", toolName: "ordercloud.specs.create", resourceType: "Spec", resourceId: spec.ID, paramsSanitized: sanitizeForAudit(params), success: false, errorMessage: e instanceof Error ? e.message : String(e) });
         return err(e);
       }
     }
@@ -123,10 +127,13 @@ export function registerSpecTools(server: McpServer, client: OrderCloudClient): 
       }),
     },
     async ({ specId, spec }) => {
+      const params = { specId, spec };
       try {
         const data = await client.request<Spec>("PATCH", `/v1/specs/${specId}`, undefined, spec);
+        recordAudit({ operation: "update", toolName: "ordercloud.specs.patch", resourceType: "Spec", resourceId: specId, paramsSanitized: sanitizeForAudit(params), success: true });
         return ok(data);
       } catch (e) {
+        recordAudit({ operation: "update", toolName: "ordercloud.specs.patch", resourceType: "Spec", resourceId: specId, paramsSanitized: sanitizeForAudit(params), success: false, errorMessage: e instanceof Error ? e.message : String(e) });
         return err(e);
       }
     }
@@ -141,10 +148,13 @@ export function registerSpecTools(server: McpServer, client: OrderCloudClient): 
       }),
     },
     async ({ specId }) => {
+      const params = { specId };
       try {
         await client.request("DELETE", `/v1/specs/${specId}`);
+        recordAudit({ operation: "delete", toolName: "ordercloud.specs.delete", resourceType: "Spec", resourceId: specId, paramsSanitized: sanitizeForAudit(params), success: true });
         return ok({ deleted: true, id: specId });
       } catch (e) {
+        recordAudit({ operation: "delete", toolName: "ordercloud.specs.delete", resourceType: "Spec", resourceId: specId, paramsSanitized: sanitizeForAudit(params), success: false, errorMessage: e instanceof Error ? e.message : String(e) });
         return err(e);
       }
     }
@@ -190,10 +200,13 @@ export function registerSpecTools(server: McpServer, client: OrderCloudClient): 
       }),
     },
     async ({ specId, option }) => {
+      const params = { specId, option };
       try {
         const data = await client.request<SpecOption>("POST", `/v1/specs/${specId}/options`, undefined, option);
+        recordAudit({ operation: "update", toolName: "ordercloud.specs.options.add", resourceType: "SpecOption", resourceId: option.ID, paramsSanitized: sanitizeForAudit(params), success: true });
         return ok(data);
       } catch (e) {
+        recordAudit({ operation: "update", toolName: "ordercloud.specs.options.add", resourceType: "SpecOption", resourceId: option.ID, paramsSanitized: sanitizeForAudit(params), success: false, errorMessage: e instanceof Error ? e.message : String(e) });
         return err(e);
       }
     }
@@ -209,6 +222,7 @@ export function registerSpecTools(server: McpServer, client: OrderCloudClient): 
       }),
     },
     async ({ productId, priceScheduleId }) => {
+      const params = { productId, priceScheduleId };
       try {
         // First get the product to see what specs are assigned
         const product = await client.request("GET", `/v1/products/${productId}`);
@@ -217,7 +231,9 @@ export function registerSpecTools(server: McpServer, client: OrderCloudClient): 
         const specsData = await client.request<OcList<Spec>>("GET", `/v1/products/${productId}/specs`);
         
         if (!specsData.Items || specsData.Items.length === 0) {
-          return err(new Error("Product has no specs assigned. Assign specs before generating variants."));
+          const msg = "Product has no specs assigned. Assign specs before generating variants.";
+          recordAudit({ operation: "update", toolName: "ordercloud.products.generateVariants", resourceType: "Product", resourceId: productId, paramsSanitized: sanitizeForAudit(params), success: false, errorMessage: msg });
+          return err(new Error(msg));
         }
 
         // Get options for each spec
@@ -230,7 +246,9 @@ export function registerSpecTools(server: McpServer, client: OrderCloudClient): 
         }
 
         if (specOptions.length === 0) {
-          return err(new Error("No spec options found. Add options to specs before generating variants."));
+          const msg = "No spec options found. Add options to specs before generating variants.";
+          recordAudit({ operation: "update", toolName: "ordercloud.products.generateVariants", resourceType: "Product", resourceId: productId, paramsSanitized: sanitizeForAudit(params), success: false, errorMessage: msg });
+          return err(new Error(msg));
         }
 
         // Generate all combinations using cartesian product
@@ -270,12 +288,14 @@ export function registerSpecTools(server: McpServer, client: OrderCloudClient): 
           }
         }
 
+        recordAudit({ operation: "update", toolName: "ordercloud.products.generateVariants", resourceType: "Product", resourceId: productId, paramsSanitized: sanitizeForAudit(params), success: true });
         return ok({
           productId,
           variantsGenerated: variants.length,
           variants,
         });
       } catch (e) {
+        recordAudit({ operation: "update", toolName: "ordercloud.products.generateVariants", resourceType: "Product", resourceId: productId, paramsSanitized: sanitizeForAudit(params), success: false, errorMessage: e instanceof Error ? e.message : String(e) });
         return err(e);
       }
     }

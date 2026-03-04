@@ -5,6 +5,7 @@ import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
 import { OrderCloudClient } from "../client.js";
 import { ok, err, buildListQuery, normalizePagination, OcList } from "../helpers/index.js";
+import { recordAudit, sanitizeForAudit } from "../helpers/audit.js";
 
 /**
  * Register all address-related tools.
@@ -103,6 +104,7 @@ export function registerAddressTools(server: McpServer, client: OrderCloudClient
       }),
     },
     async ({ entityType, entityId, userId, address }) => {
+      const params = { entityType, entityId, userId, address };
       try {
         let path: string;
         
@@ -115,8 +117,10 @@ export function registerAddressTools(server: McpServer, client: OrderCloudClient
         }
         
         const data = await client.request("POST", path, undefined, address);
+        recordAudit({ operation: "create", toolName: "ordercloud.addresses.create", resourceType: "Address", resourceId: address.ID, paramsSanitized: sanitizeForAudit(params), success: true });
         return ok(data);
       } catch (e) {
+        recordAudit({ operation: "create", toolName: "ordercloud.addresses.create", resourceType: "Address", resourceId: address.ID, paramsSanitized: sanitizeForAudit(params), success: false, errorMessage: e instanceof Error ? e.message : String(e) });
         return err(e);
       }
     }
@@ -135,6 +139,7 @@ export function registerAddressTools(server: McpServer, client: OrderCloudClient
       }),
     },
     async ({ entityType, entityId, addressId, userId, patch }) => {
+      const params = { entityType, entityId, addressId, userId, patch };
       try {
         let path: string;
         
@@ -147,8 +152,10 @@ export function registerAddressTools(server: McpServer, client: OrderCloudClient
         }
         
         const data = await client.request("PATCH", path, undefined, patch);
+        recordAudit({ operation: "update", toolName: "ordercloud.addresses.patch", resourceType: "Address", resourceId: addressId, paramsSanitized: sanitizeForAudit(params), success: true });
         return ok(data);
       } catch (e) {
+        recordAudit({ operation: "update", toolName: "ordercloud.addresses.patch", resourceType: "Address", resourceId: addressId, paramsSanitized: sanitizeForAudit(params), success: false, errorMessage: e instanceof Error ? e.message : String(e) });
         return err(e);
       }
     }
@@ -166,6 +173,7 @@ export function registerAddressTools(server: McpServer, client: OrderCloudClient
       }),
     },
     async ({ entityType, entityId, addressId, userId }) => {
+      const params = { entityType, entityId, addressId, userId };
       try {
         let path: string;
         
@@ -178,8 +186,10 @@ export function registerAddressTools(server: McpServer, client: OrderCloudClient
         }
         
         await client.request("DELETE", path);
+        recordAudit({ operation: "delete", toolName: "ordercloud.addresses.delete", resourceType: "Address", resourceId: addressId, paramsSanitized: sanitizeForAudit(params), success: true });
         return ok({ deleted: true, entityType, entityId, addressId });
       } catch (e) {
+        recordAudit({ operation: "delete", toolName: "ordercloud.addresses.delete", resourceType: "Address", resourceId: addressId, paramsSanitized: sanitizeForAudit(params), success: false, errorMessage: e instanceof Error ? e.message : String(e) });
         return err(e);
       }
     }

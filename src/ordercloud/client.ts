@@ -71,6 +71,18 @@ export class OrderCloudClient {
     return this.config.baseUrl;
   }
 
+  get authUrl(): string {
+    return this.config.authUrl;
+  }
+
+  get clientId(): string | undefined {
+    return this.config.clientId;
+  }
+
+  get scope(): string | undefined {
+    return this.config.scope;
+  }
+
   get currentAuthMode(): string {
     return this.authMode;
   }
@@ -198,5 +210,10 @@ export class OrderCloudClient {
     } catch (e) {
       return { ok: false };
     }
+  }
+
+  /** Check if currently connected (can get a valid token) */
+  get isConnected(): boolean {
+    return this.tokenCache !== null && Date.now() < this.tokenCache.expiresAt - TOKEN_BUFFER_MS;
   }
 }

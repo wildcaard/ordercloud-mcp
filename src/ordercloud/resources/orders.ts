@@ -5,6 +5,7 @@ import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
 import { OrderCloudClient } from "../client.js";
 import { ok, err, buildListQuery, normalizePagination, OcList } from "../helpers/index.js";
+import { recordAudit, sanitizeForAudit } from "../helpers/audit.js";
 
 /**
  * Register all order-related tools.
@@ -79,10 +80,14 @@ export function registerOrderTools(server: McpServer, client: OrderCloudClient):
       }),
     },
     async ({ direction, order }) => {
+      const params = { direction, order };
       try {
-        const data = await client.request("POST", `/v1/orders/${direction}`, undefined, order);
+        const data = await client.request<{ ID?: string }>("POST", `/v1/orders/${direction}`, undefined, order);
+        const resourceId = data.ID ?? (order as { ID?: string }).ID;
+        recordAudit({ operation: "create", toolName: "ordercloud.orders.create", resourceType: "Order", resourceId, paramsSanitized: sanitizeForAudit(params), success: true });
         return ok(data);
       } catch (e) {
+        recordAudit({ operation: "create", toolName: "ordercloud.orders.create", resourceType: "Order", resourceId: (order as { ID?: string }).ID, paramsSanitized: sanitizeForAudit(params), success: false, errorMessage: e instanceof Error ? e.message : String(e) });
         return err(e);
       }
     }
@@ -99,10 +104,13 @@ export function registerOrderTools(server: McpServer, client: OrderCloudClient):
       }),
     },
     async ({ direction, orderId, patch }) => {
+      const params = { direction, orderId, patch };
       try {
         const data = await client.request("PATCH", `/v1/orders/${direction}/${orderId}`, undefined, patch);
+        recordAudit({ operation: "update", toolName: "ordercloud.orders.patch", resourceType: "Order", resourceId: orderId, paramsSanitized: sanitizeForAudit(params), success: true });
         return ok(data);
       } catch (e) {
+        recordAudit({ operation: "update", toolName: "ordercloud.orders.patch", resourceType: "Order", resourceId: orderId, paramsSanitized: sanitizeForAudit(params), success: false, errorMessage: e instanceof Error ? e.message : String(e) });
         return err(e);
       }
     }
@@ -118,10 +126,13 @@ export function registerOrderTools(server: McpServer, client: OrderCloudClient):
       }),
     },
     async ({ direction, orderId }) => {
+      const params = { direction, orderId };
       try {
         await client.request("DELETE", `/v1/orders/${direction}/${orderId}`);
+        recordAudit({ operation: "delete", toolName: "ordercloud.orders.delete", resourceType: "Order", resourceId: orderId, paramsSanitized: sanitizeForAudit(params), success: true });
         return ok({ deleted: true, direction, orderId });
       } catch (e) {
+        recordAudit({ operation: "delete", toolName: "ordercloud.orders.delete", resourceType: "Order", resourceId: orderId, paramsSanitized: sanitizeForAudit(params), success: false, errorMessage: e instanceof Error ? e.message : String(e) });
         return err(e);
       }
     }
@@ -164,10 +175,13 @@ export function registerOrderTools(server: McpServer, client: OrderCloudClient):
       }),
     },
     async ({ direction, orderId }) => {
+      const params = { direction, orderId };
       try {
         const data = await client.request("POST", `/v1/orders/${direction}/${orderId}/submit`);
+        recordAudit({ operation: "update", toolName: "ordercloud.orders.submit", resourceType: "Order", resourceId: orderId, paramsSanitized: sanitizeForAudit(params), success: true });
         return ok(data);
       } catch (e) {
+        recordAudit({ operation: "update", toolName: "ordercloud.orders.submit", resourceType: "Order", resourceId: orderId, paramsSanitized: sanitizeForAudit(params), success: false, errorMessage: e instanceof Error ? e.message : String(e) });
         return err(e);
       }
     }

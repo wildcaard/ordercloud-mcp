@@ -5,6 +5,7 @@ import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
 import { OrderCloudClient } from "../client.js";
 import { ok, err, resolveResourcePath, validateXp, deepMerge } from "../helpers/index.js";
+import { recordAudit, sanitizeForAudit } from "../helpers/audit.js";
 
 /**
  * Register all XP (extended properties) related tools.
@@ -41,6 +42,8 @@ export function registerXpTools(server: McpServer, client: OrderCloudClient): vo
       }),
     },
     async ({ resourceType, identifiers, xpPatch }) => {
+      const params = { resourceType, identifiers, xpPatch };
+      const resourceId = identifiers.productId ?? identifiers.orderId ?? identifiers.userId ?? identifiers.buyerId ?? identifiers.categoryId ?? identifiers.catalogId;
       try {
         validateXp(xpPatch);
         
@@ -50,8 +53,10 @@ export function registerXpTools(server: McpServer, client: OrderCloudClient): vo
         const mergedXp = deepMerge(current.xp || {}, xpPatch);
         const data = await client.request("PATCH", path, undefined, { xp: mergedXp });
         
+        recordAudit({ operation: "update", toolName: "ordercloud.xp.patch", resourceType: "XP", resourceId, paramsSanitized: sanitizeForAudit(params), success: true });
         return ok(data);
       } catch (e) {
+        recordAudit({ operation: "update", toolName: "ordercloud.xp.patch", resourceType: "XP", resourceId, paramsSanitized: sanitizeForAudit(params), success: false, errorMessage: e instanceof Error ? e.message : String(e) });
         return err(e);
       }
     }

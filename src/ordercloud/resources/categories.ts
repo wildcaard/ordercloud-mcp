@@ -5,6 +5,7 @@ import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
 import { OrderCloudClient } from "../client.js";
 import { ok, err, buildListQuery, normalizePagination, OcList } from "../helpers/index.js";
+import { recordAudit, sanitizeForAudit } from "../helpers/audit.js";
 
 /**
  * Register all category-related tools.
@@ -70,10 +71,13 @@ export function registerCategoryTools(server: McpServer, client: OrderCloudClien
       }),
     },
     async ({ catalogId, category }) => {
+      const params = { catalogId, category };
       try {
         const data = await client.request("POST", `/v1/catalogs/${catalogId}/categories`, undefined, category);
+        recordAudit({ operation: "create", toolName: "ordercloud.categories.create", resourceType: "Category", resourceId: category.ID, paramsSanitized: sanitizeForAudit(params), success: true });
         return ok(data);
       } catch (e) {
+        recordAudit({ operation: "create", toolName: "ordercloud.categories.create", resourceType: "Category", resourceId: category.ID, paramsSanitized: sanitizeForAudit(params), success: false, errorMessage: e instanceof Error ? e.message : String(e) });
         return err(e);
       }
     }
@@ -90,10 +94,13 @@ export function registerCategoryTools(server: McpServer, client: OrderCloudClien
       }),
     },
     async ({ catalogId, categoryId, patch }) => {
+      const params = { catalogId, categoryId, patch };
       try {
         const data = await client.request("PATCH", `/v1/catalogs/${catalogId}/categories/${categoryId}`, undefined, patch);
+        recordAudit({ operation: "update", toolName: "ordercloud.categories.patch", resourceType: "Category", resourceId: categoryId, paramsSanitized: sanitizeForAudit(params), success: true });
         return ok(data);
       } catch (e) {
+        recordAudit({ operation: "update", toolName: "ordercloud.categories.patch", resourceType: "Category", resourceId: categoryId, paramsSanitized: sanitizeForAudit(params), success: false, errorMessage: e instanceof Error ? e.message : String(e) });
         return err(e);
       }
     }
@@ -109,10 +116,13 @@ export function registerCategoryTools(server: McpServer, client: OrderCloudClien
       }),
     },
     async ({ catalogId, categoryId }) => {
+      const params = { catalogId, categoryId };
       try {
         await client.request("DELETE", `/v1/catalogs/${catalogId}/categories/${categoryId}`);
+        recordAudit({ operation: "delete", toolName: "ordercloud.categories.delete", resourceType: "Category", resourceId: categoryId, paramsSanitized: sanitizeForAudit(params), success: true });
         return ok({ deleted: true, catalogId, categoryId });
       } catch (e) {
+        recordAudit({ operation: "delete", toolName: "ordercloud.categories.delete", resourceType: "Category", resourceId: categoryId, paramsSanitized: sanitizeForAudit(params), success: false, errorMessage: e instanceof Error ? e.message : String(e) });
         return err(e);
       }
     }

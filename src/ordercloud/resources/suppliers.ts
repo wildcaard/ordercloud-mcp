@@ -5,6 +5,7 @@ import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
 import { OrderCloudClient } from "../client.js";
 import { ok, err, buildListQuery, normalizePagination, OcList } from "../helpers/index.js";
+import { recordAudit, sanitizeForAudit } from "../helpers/audit.js";
 
 /**
  * Register all supplier-related tools.
@@ -66,10 +67,13 @@ export function registerSupplierTools(server: McpServer, client: OrderCloudClien
       }),
     },
     async ({ supplier }) => {
+      const params = { supplier };
       try {
         const data = await client.request("POST", "/v1/suppliers", undefined, supplier);
+        recordAudit({ operation: "create", toolName: "ordercloud.suppliers.create", resourceType: "Supplier", resourceId: supplier.ID, paramsSanitized: sanitizeForAudit(params), success: true });
         return ok(data);
       } catch (e) {
+        recordAudit({ operation: "create", toolName: "ordercloud.suppliers.create", resourceType: "Supplier", resourceId: supplier.ID, paramsSanitized: sanitizeForAudit(params), success: false, errorMessage: e instanceof Error ? e.message : String(e) });
         return err(e);
       }
     }
@@ -85,10 +89,13 @@ export function registerSupplierTools(server: McpServer, client: OrderCloudClien
       }),
     },
     async ({ supplierId, patch }) => {
+      const params = { supplierId, patch };
       try {
         const data = await client.request("PATCH", `/v1/suppliers/${supplierId}`, undefined, patch);
+        recordAudit({ operation: "update", toolName: "ordercloud.suppliers.patch", resourceType: "Supplier", resourceId: supplierId, paramsSanitized: sanitizeForAudit(params), success: true });
         return ok(data);
       } catch (e) {
+        recordAudit({ operation: "update", toolName: "ordercloud.suppliers.patch", resourceType: "Supplier", resourceId: supplierId, paramsSanitized: sanitizeForAudit(params), success: false, errorMessage: e instanceof Error ? e.message : String(e) });
         return err(e);
       }
     }
@@ -103,10 +110,13 @@ export function registerSupplierTools(server: McpServer, client: OrderCloudClien
       }),
     },
     async ({ supplierId }) => {
+      const params = { supplierId };
       try {
         await client.request("DELETE", `/v1/suppliers/${supplierId}`);
+        recordAudit({ operation: "delete", toolName: "ordercloud.suppliers.delete", resourceType: "Supplier", resourceId: supplierId, paramsSanitized: sanitizeForAudit(params), success: true });
         return ok({ deleted: true, supplierId });
       } catch (e) {
+        recordAudit({ operation: "delete", toolName: "ordercloud.suppliers.delete", resourceType: "Supplier", resourceId: supplierId, paramsSanitized: sanitizeForAudit(params), success: false, errorMessage: e instanceof Error ? e.message : String(e) });
         return err(e);
       }
     }

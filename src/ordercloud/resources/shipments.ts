@@ -5,6 +5,7 @@ import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
 import { OrderCloudClient } from "../client.js";
 import { ok, err, buildListQuery, normalizePagination, OcList } from "../helpers/index.js";
+import { recordAudit, sanitizeForAudit } from "../helpers/audit.js";
 
 /**
  * Shipment entity.
@@ -91,10 +92,13 @@ export function registerShipmentTools(server: McpServer, client: OrderCloudClien
       }),
     },
     async ({ shipment }) => {
+      const params = { shipment };
       try {
         const data = await client.request<Shipment>("POST", "/v1/shipments", undefined, shipment);
+        recordAudit({ operation: "create", toolName: "ordercloud.shipments.create", resourceType: "Shipment", resourceId: shipment.ID, paramsSanitized: sanitizeForAudit(params), success: true });
         return ok(data);
       } catch (e) {
+        recordAudit({ operation: "create", toolName: "ordercloud.shipments.create", resourceType: "Shipment", resourceId: shipment.ID, paramsSanitized: sanitizeForAudit(params), success: false, errorMessage: e instanceof Error ? e.message : String(e) });
         return err(e);
       }
     }
@@ -116,10 +120,13 @@ export function registerShipmentTools(server: McpServer, client: OrderCloudClien
       }),
     },
     async ({ shipmentId, shipment }) => {
+      const params = { shipmentId, shipment };
       try {
         const data = await client.request<Shipment>("PATCH", `/v1/shipments/${shipmentId}`, undefined, shipment);
+        recordAudit({ operation: "update", toolName: "ordercloud.shipments.patch", resourceType: "Shipment", resourceId: shipmentId, paramsSanitized: sanitizeForAudit(params), success: true });
         return ok(data);
       } catch (e) {
+        recordAudit({ operation: "update", toolName: "ordercloud.shipments.patch", resourceType: "Shipment", resourceId: shipmentId, paramsSanitized: sanitizeForAudit(params), success: false, errorMessage: e instanceof Error ? e.message : String(e) });
         return err(e);
       }
     }
@@ -137,6 +144,7 @@ export function registerShipmentTools(server: McpServer, client: OrderCloudClien
       }),
     },
     async ({ shipmentId, orderId, lineItemId, quantityShipped }) => {
+      const params = { shipmentId, orderId, lineItemId, quantityShipped };
       try {
         const shipmentItem: ShipmentItem = {
           OrderID: orderId,
@@ -144,8 +152,10 @@ export function registerShipmentTools(server: McpServer, client: OrderCloudClien
           QuantityShipped: quantityShipped,
         };
         const data = await client.request("POST", `/v1/shipments/${shipmentId}/items`, undefined, shipmentItem);
+        recordAudit({ operation: "update", toolName: "ordercloud.shipments.addLineItem", resourceType: "Shipment", resourceId: shipmentId, paramsSanitized: sanitizeForAudit(params), success: true });
         return ok(data);
       } catch (e) {
+        recordAudit({ operation: "update", toolName: "ordercloud.shipments.addLineItem", resourceType: "Shipment", resourceId: shipmentId, paramsSanitized: sanitizeForAudit(params), success: false, errorMessage: e instanceof Error ? e.message : String(e) });
         return err(e);
       }
     }

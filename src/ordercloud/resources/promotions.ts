@@ -5,6 +5,7 @@ import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
 import { OrderCloudClient } from "../client.js";
 import { ok, err, buildListQuery, normalizePagination, OcList } from "../helpers/index.js";
+import { recordAudit, sanitizeForAudit } from "../helpers/audit.js";
 
 /**
  * Promotion entity.
@@ -92,10 +93,13 @@ export function registerPromotionTools(server: McpServer, client: OrderCloudClie
       }),
     },
     async ({ promotion }) => {
+      const params = { promotion };
       try {
         const data = await client.request<Promotion>("POST", "/v1/promotions", undefined, promotion);
+        recordAudit({ operation: "create", toolName: "ordercloud.promotions.create", resourceType: "Promotion", resourceId: promotion.ID, paramsSanitized: sanitizeForAudit(params), success: true });
         return ok(data);
       } catch (e) {
+        recordAudit({ operation: "create", toolName: "ordercloud.promotions.create", resourceType: "Promotion", resourceId: promotion.ID, paramsSanitized: sanitizeForAudit(params), success: false, errorMessage: e instanceof Error ? e.message : String(e) });
         return err(e);
       }
     }
@@ -123,10 +127,13 @@ export function registerPromotionTools(server: McpServer, client: OrderCloudClie
       }),
     },
     async ({ promotionId, promotion }) => {
+      const params = { promotionId, promotion };
       try {
         const data = await client.request<Promotion>("PATCH", `/v1/promotions/${promotionId}`, undefined, promotion);
+        recordAudit({ operation: "update", toolName: "ordercloud.promotions.patch", resourceType: "Promotion", resourceId: promotionId, paramsSanitized: sanitizeForAudit(params), success: true });
         return ok(data);
       } catch (e) {
+        recordAudit({ operation: "update", toolName: "ordercloud.promotions.patch", resourceType: "Promotion", resourceId: promotionId, paramsSanitized: sanitizeForAudit(params), success: false, errorMessage: e instanceof Error ? e.message : String(e) });
         return err(e);
       }
     }
@@ -141,10 +148,13 @@ export function registerPromotionTools(server: McpServer, client: OrderCloudClie
       }),
     },
     async ({ promotionId }) => {
+      const params = { promotionId };
       try {
         await client.request("DELETE", `/v1/promotions/${promotionId}`);
+        recordAudit({ operation: "delete", toolName: "ordercloud.promotions.delete", resourceType: "Promotion", resourceId: promotionId, paramsSanitized: sanitizeForAudit(params), success: true });
         return ok({ deleted: true, id: promotionId });
       } catch (e) {
+        recordAudit({ operation: "delete", toolName: "ordercloud.promotions.delete", resourceType: "Promotion", resourceId: promotionId, paramsSanitized: sanitizeForAudit(params), success: false, errorMessage: e instanceof Error ? e.message : String(e) });
         return err(e);
       }
     }
@@ -160,12 +170,15 @@ export function registerPromotionTools(server: McpServer, client: OrderCloudClie
       }),
     },
     async ({ promotionId, buyerId }) => {
+      const params = { promotionId, buyerId };
       try {
         const data = await client.request("POST", `/v1/promotions/${promotionId}/assignments`, undefined, {
           BuyerID: buyerId,
         });
+        recordAudit({ operation: "update", toolName: "ordercloud.promotions.assign", resourceType: "Promotion", resourceId: promotionId, paramsSanitized: sanitizeForAudit(params), success: true });
         return ok({ assigned: true, promotionId, buyerId });
       } catch (e) {
+        recordAudit({ operation: "update", toolName: "ordercloud.promotions.assign", resourceType: "Promotion", resourceId: promotionId, paramsSanitized: sanitizeForAudit(params), success: false, errorMessage: e instanceof Error ? e.message : String(e) });
         return err(e);
       }
     }

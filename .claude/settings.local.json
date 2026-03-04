@@ -1,6 +1,11 @@
 {
+  "enableAllProjectMcpServers": true,
   "enabledMcpjsonServers": [
     "ordercloud"
   ],
-  "enableAllProjectMcpServers": true
+  "permissions": {
+    "allow": [
+      "mcp__ordercloud__ordercloud_addresses_listForEntity"
+    ]
+  }
 }

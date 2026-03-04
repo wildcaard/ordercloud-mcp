@@ -5,6 +5,7 @@ import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
 import { OrderCloudClient } from "../client.js";
 import { ok, err, buildListQuery, normalizePagination, OcList } from "../helpers/index.js";
+import { recordAudit, sanitizeForAudit } from "../helpers/audit.js";
 
 /**
  * Register all price schedule-related tools.
@@ -74,10 +75,13 @@ export function registerPriceScheduleTools(server: McpServer, client: OrderCloud
       }),
     },
     async ({ priceSchedule }) => {
+      const params = { priceSchedule };
       try {
         const data = await client.request("POST", "/v1/priceSchedules", undefined, priceSchedule);
+        recordAudit({ operation: "create", toolName: "ordercloud.priceSchedules.create", resourceType: "PriceSchedule", resourceId: priceSchedule.ID, paramsSanitized: sanitizeForAudit(params), success: true });
         return ok(data);
       } catch (e) {
+        recordAudit({ operation: "create", toolName: "ordercloud.priceSchedules.create", resourceType: "PriceSchedule", resourceId: priceSchedule.ID, paramsSanitized: sanitizeForAudit(params), success: false, errorMessage: e instanceof Error ? e.message : String(e) });
         return err(e);
       }
     }
@@ -93,10 +97,13 @@ export function registerPriceScheduleTools(server: McpServer, client: OrderCloud
       }),
     },
     async ({ priceScheduleId, patch }) => {
+      const params = { priceScheduleId, patch };
       try {
         const data = await client.request("PATCH", `/v1/priceSchedules/${priceScheduleId}`, undefined, patch);
+        recordAudit({ operation: "update", toolName: "ordercloud.priceSchedules.patch", resourceType: "PriceSchedule", resourceId: priceScheduleId, paramsSanitized: sanitizeForAudit(params), success: true });
         return ok(data);
       } catch (e) {
+        recordAudit({ operation: "update", toolName: "ordercloud.priceSchedules.patch", resourceType: "PriceSchedule", resourceId: priceScheduleId, paramsSanitized: sanitizeForAudit(params), success: false, errorMessage: e instanceof Error ? e.message : String(e) });
         return err(e);
       }
     }
@@ -116,10 +123,13 @@ export function registerPriceScheduleTools(server: McpServer, client: OrderCloud
       }),
     },
     async ({ priceScheduleId, priceBreak }) => {
+      const params = { priceScheduleId, priceBreak };
       try {
         const data = await client.request("POST", `/v1/priceSchedules/${priceScheduleId}/pricebreaks`, undefined, priceBreak);
+        recordAudit({ operation: "update", toolName: "ordercloud.priceSchedules.addPriceBreak", resourceType: "PriceSchedule", resourceId: priceScheduleId, paramsSanitized: sanitizeForAudit(params), success: true });
         return ok(data);
       } catch (e) {
+        recordAudit({ operation: "update", toolName: "ordercloud.priceSchedules.addPriceBreak", resourceType: "PriceSchedule", resourceId: priceScheduleId, paramsSanitized: sanitizeForAudit(params), success: false, errorMessage: e instanceof Error ? e.message : String(e) });
         return err(e);
       }
     }

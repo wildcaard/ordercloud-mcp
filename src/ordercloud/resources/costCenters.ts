@@ -5,6 +5,7 @@ import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
 import { OrderCloudClient } from "../client.js";
 import { ok, err, buildListQuery, normalizePagination, OcList } from "../helpers/index.js";
+import { recordAudit, sanitizeForAudit } from "../helpers/audit.js";
 
 /**
  * Cost Center entity.
@@ -96,10 +97,13 @@ export function registerCostCenterTools(server: McpServer, client: OrderCloudCli
       }),
     },
     async ({ buyerId, costCenter }) => {
+      const params = { buyerId, costCenter };
       try {
         const data = await client.request<CostCenter>("POST", `/v1/buyers/${buyerId}/costcenters`, undefined, costCenter);
+        recordAudit({ operation: "create", toolName: "ordercloud.costCenters.create", resourceType: "CostCenter", resourceId: costCenter.ID, paramsSanitized: sanitizeForAudit(params), success: true });
         return ok(data);
       } catch (e) {
+        recordAudit({ operation: "create", toolName: "ordercloud.costCenters.create", resourceType: "CostCenter", resourceId: costCenter.ID, paramsSanitized: sanitizeForAudit(params), success: false, errorMessage: e instanceof Error ? e.message : String(e) });
         return err(e);
       }
     }
@@ -121,10 +125,13 @@ export function registerCostCenterTools(server: McpServer, client: OrderCloudCli
       }),
     },
     async ({ buyerId, costCenterId, costCenter }) => {
+      const params = { buyerId, costCenterId, costCenter };
       try {
         const data = await client.request<CostCenter>("PATCH", `/v1/buyers/${buyerId}/costcenters/${costCenterId}`, undefined, costCenter);
+        recordAudit({ operation: "update", toolName: "ordercloud.costCenters.patch", resourceType: "CostCenter", resourceId: costCenterId, paramsSanitized: sanitizeForAudit(params), success: true });
         return ok(data);
       } catch (e) {
+        recordAudit({ operation: "update", toolName: "ordercloud.costCenters.patch", resourceType: "CostCenter", resourceId: costCenterId, paramsSanitized: sanitizeForAudit(params), success: false, errorMessage: e instanceof Error ? e.message : String(e) });
         return err(e);
       }
     }
@@ -140,10 +147,13 @@ export function registerCostCenterTools(server: McpServer, client: OrderCloudCli
       }),
     },
     async ({ buyerId, costCenterId }) => {
+      const params = { buyerId, costCenterId };
       try {
         await client.request("DELETE", `/v1/buyers/${buyerId}/costcenters/${costCenterId}`);
+        recordAudit({ operation: "delete", toolName: "ordercloud.costCenters.delete", resourceType: "CostCenter", resourceId: costCenterId, paramsSanitized: sanitizeForAudit(params), success: true });
         return ok({ deleted: true, id: costCenterId });
       } catch (e) {
+        recordAudit({ operation: "delete", toolName: "ordercloud.costCenters.delete", resourceType: "CostCenter", resourceId: costCenterId, paramsSanitized: sanitizeForAudit(params), success: false, errorMessage: e instanceof Error ? e.message : String(e) });
         return err(e);
       }
     }
@@ -213,10 +223,13 @@ export function registerCostCenterTools(server: McpServer, client: OrderCloudCli
       }),
     },
     async ({ buyerId, spendingAccount }) => {
+      const params = { buyerId, spendingAccount };
       try {
         const data = await client.request<SpendingAccount>("POST", `/v1/buyers/${buyerId}/spendingaccounts`, undefined, spendingAccount);
+        recordAudit({ operation: "create", toolName: "ordercloud.spendingAccounts.create", resourceType: "SpendingAccount", resourceId: spendingAccount.ID, paramsSanitized: sanitizeForAudit(params), success: true });
         return ok(data);
       } catch (e) {
+        recordAudit({ operation: "create", toolName: "ordercloud.spendingAccounts.create", resourceType: "SpendingAccount", resourceId: spendingAccount.ID, paramsSanitized: sanitizeForAudit(params), success: false, errorMessage: e instanceof Error ? e.message : String(e) });
         return err(e);
       }
     }
@@ -243,10 +256,13 @@ export function registerCostCenterTools(server: McpServer, client: OrderCloudCli
       }),
     },
     async ({ buyerId, spendingAccountId, spendingAccount }) => {
+      const params = { buyerId, spendingAccountId, spendingAccount };
       try {
         const data = await client.request<SpendingAccount>("PATCH", `/v1/buyers/${buyerId}/spendingaccounts/${spendingAccountId}`, undefined, spendingAccount);
+        recordAudit({ operation: "update", toolName: "ordercloud.spendingAccounts.patch", resourceType: "SpendingAccount", resourceId: spendingAccountId, paramsSanitized: sanitizeForAudit(params), success: true });
         return ok(data);
       } catch (e) {
+        recordAudit({ operation: "update", toolName: "ordercloud.spendingAccounts.patch", resourceType: "SpendingAccount", resourceId: spendingAccountId, paramsSanitized: sanitizeForAudit(params), success: false, errorMessage: e instanceof Error ? e.message : String(e) });
         return err(e);
       }
     }
@@ -262,10 +278,13 @@ export function registerCostCenterTools(server: McpServer, client: OrderCloudCli
       }),
     },
     async ({ buyerId, spendingAccountId }) => {
+      const params = { buyerId, spendingAccountId };
       try {
         await client.request("DELETE", `/v1/buyers/${buyerId}/spendingaccounts/${spendingAccountId}`);
+        recordAudit({ operation: "delete", toolName: "ordercloud.spendingAccounts.delete", resourceType: "SpendingAccount", resourceId: spendingAccountId, paramsSanitized: sanitizeForAudit(params), success: true });
         return ok({ deleted: true, id: spendingAccountId });
       } catch (e) {
+        recordAudit({ operation: "delete", toolName: "ordercloud.spendingAccounts.delete", resourceType: "SpendingAccount", resourceId: spendingAccountId, paramsSanitized: sanitizeForAudit(params), success: false, errorMessage: e instanceof Error ? e.message : String(e) });
         return err(e);
       }
     }

@@ -24,6 +24,9 @@ import { registerShipmentTools } from "./resources/shipments.js";
 import { registerPaymentTools } from "./resources/payments.js";
 import { registerLineItemTools } from "./resources/lineItems.js";
 import { registerCostCenterTools } from "./resources/costCenters.js";
+import { registerCompositeTools } from "./composite.js";
+import { registerBulkTools } from "./resources/bulk.js";
+import { getAuditLog } from "./helpers/audit.js";
 
 // Tool Registration
 
@@ -79,4 +82,24 @@ export function registerTools(server: McpServer, client: OrderCloudClient): void
   registerLineItemTools(server, client);
 
   registerCostCenterTools(server, client);
+
+  registerCompositeTools(server, client);
+
+  registerBulkTools(server, client);
+
+  server.registerTool(
+    "ordercloud.audit.export",
+    {
+      description: "Export the audit log of all mutations (create/update/delete). Use for compliance and debugging.",
+      annotations: { readOnlyHint: true },
+    },
+    async () => {
+      const log = getAuditLog();
+      return ok({
+        count: log.length,
+        entries: log,
+        exportedAt: new Date().toISOString(),
+      });
+    }
+  );
 }

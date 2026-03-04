@@ -5,6 +5,7 @@ import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
 import { OrderCloudClient } from "../client.js";
 import { ok, err, buildListQuery, normalizePagination, OcList } from "../helpers/index.js";
+import { recordAudit, sanitizeForAudit } from "../helpers/audit.js";
 
 /**
  * Payment entity.
@@ -99,10 +100,13 @@ export function registerPaymentTools(server: McpServer, client: OrderCloudClient
       }),
     },
     async ({ orderId, direction, payment }) => {
+      const params = { orderId, direction, payment };
       try {
         const data = await client.request<Payment>("POST", `/v1/orders/${direction}/${orderId}/payments`, undefined, payment);
+        recordAudit({ operation: "create", toolName: "ordercloud.payments.create", resourceType: "Payment", resourceId: payment.ID, paramsSanitized: sanitizeForAudit(params), success: true });
         return ok(data);
       } catch (e) {
+        recordAudit({ operation: "create", toolName: "ordercloud.payments.create", resourceType: "Payment", resourceId: payment.ID, paramsSanitized: sanitizeForAudit(params), success: false, errorMessage: e instanceof Error ? e.message : String(e) });
         return err(e);
       }
     }
@@ -126,10 +130,13 @@ export function registerPaymentTools(server: McpServer, client: OrderCloudClient
       }),
     },
     async ({ orderId, direction, paymentId, payment }) => {
+      const params = { orderId, direction, paymentId, payment };
       try {
         const data = await client.request<Payment>("PATCH", `/v1/orders/${direction}/${orderId}/payments/${paymentId}`, undefined, payment);
+        recordAudit({ operation: "update", toolName: "ordercloud.payments.patch", resourceType: "Payment", resourceId: paymentId, paramsSanitized: sanitizeForAudit(params), success: true });
         return ok(data);
       } catch (e) {
+        recordAudit({ operation: "update", toolName: "ordercloud.payments.patch", resourceType: "Payment", resourceId: paymentId, paramsSanitized: sanitizeForAudit(params), success: false, errorMessage: e instanceof Error ? e.message : String(e) });
         return err(e);
       }
     }

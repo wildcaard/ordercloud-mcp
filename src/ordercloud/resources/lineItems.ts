@@ -5,6 +5,7 @@ import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
 import { OrderCloudClient } from "../client.js";
 import { ok, err, buildListQuery, normalizePagination, OcList } from "../helpers/index.js";
+import { recordAudit, sanitizeForAudit } from "../helpers/audit.js";
 
 /**
  * Line Item entity.
@@ -89,10 +90,13 @@ export function registerLineItemTools(server: McpServer, client: OrderCloudClien
       }),
     },
     async ({ orderId, direction, lineItem }) => {
+      const params = { orderId, direction, lineItem };
       try {
         const data = await client.request<LineItem>("POST", `/v1/orders/${direction}/${orderId}/lineitems`, undefined, lineItem);
+        recordAudit({ operation: "create", toolName: "ordercloud.lineItems.create", resourceType: "LineItem", resourceId: data.ID, paramsSanitized: sanitizeForAudit(params), success: true });
         return ok(data);
       } catch (e) {
+        recordAudit({ operation: "create", toolName: "ordercloud.lineItems.create", resourceType: "LineItem", paramsSanitized: sanitizeForAudit(params), success: false, errorMessage: e instanceof Error ? e.message : String(e) });
         return err(e);
       }
     }
@@ -115,10 +119,13 @@ export function registerLineItemTools(server: McpServer, client: OrderCloudClien
       }),
     },
     async ({ orderId, direction, lineItemId, lineItem }) => {
+      const params = { orderId, direction, lineItemId, lineItem };
       try {
         const data = await client.request<LineItem>("PATCH", `/v1/orders/${direction}/${orderId}/lineitems/${lineItemId}`, undefined, lineItem);
+        recordAudit({ operation: "update", toolName: "ordercloud.lineItems.patch", resourceType: "LineItem", resourceId: lineItemId, paramsSanitized: sanitizeForAudit(params), success: true });
         return ok(data);
       } catch (e) {
+        recordAudit({ operation: "update", toolName: "ordercloud.lineItems.patch", resourceType: "LineItem", resourceId: lineItemId, paramsSanitized: sanitizeForAudit(params), success: false, errorMessage: e instanceof Error ? e.message : String(e) });
         return err(e);
       }
     }
@@ -135,10 +142,13 @@ export function registerLineItemTools(server: McpServer, client: OrderCloudClien
       }),
     },
     async ({ orderId, direction, lineItemId }) => {
+      const params = { orderId, direction, lineItemId };
       try {
         await client.request("DELETE", `/v1/orders/${direction}/${orderId}/lineitems/${lineItemId}`);
+        recordAudit({ operation: "delete", toolName: "ordercloud.lineItems.delete", resourceType: "LineItem", resourceId: lineItemId, paramsSanitized: sanitizeForAudit(params), success: true });
         return ok({ deleted: true, orderId, lineItemId });
       } catch (e) {
+        recordAudit({ operation: "delete", toolName: "ordercloud.lineItems.delete", resourceType: "LineItem", resourceId: lineItemId, paramsSanitized: sanitizeForAudit(params), success: false, errorMessage: e instanceof Error ? e.message : String(e) });
         return err(e);
       }
     }

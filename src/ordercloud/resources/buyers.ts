@@ -5,6 +5,7 @@ import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
 import { OrderCloudClient } from "../client.js";
 import { ok, err, buildListQuery, normalizePagination, OcList } from "../helpers/index.js";
+import { recordAudit, sanitizeForAudit } from "../helpers/audit.js";
 
 /**
  * Register all buyer and user-related tools.
@@ -65,10 +66,13 @@ export function registerBuyerTools(server: McpServer, client: OrderCloudClient):
       }),
     },
     async ({ buyer }) => {
+      const params = { buyer };
       try {
         const data = await client.request("POST", "/v1/buyers", undefined, buyer);
+        recordAudit({ operation: "create", toolName: "ordercloud.buyers.create", resourceType: "Buyer", resourceId: buyer.ID, paramsSanitized: sanitizeForAudit(params), success: true });
         return ok(data);
       } catch (e) {
+        recordAudit({ operation: "create", toolName: "ordercloud.buyers.create", resourceType: "Buyer", resourceId: buyer.ID, paramsSanitized: sanitizeForAudit(params), success: false, errorMessage: e instanceof Error ? e.message : String(e) });
         return err(e);
       }
     }
@@ -84,10 +88,13 @@ export function registerBuyerTools(server: McpServer, client: OrderCloudClient):
       }),
     },
     async ({ buyerId, patch }) => {
+      const params = { buyerId, patch };
       try {
         const data = await client.request("PATCH", `/v1/buyers/${buyerId}`, undefined, patch);
+        recordAudit({ operation: "update", toolName: "ordercloud.buyers.patch", resourceType: "Buyer", resourceId: buyerId, paramsSanitized: sanitizeForAudit(params), success: true });
         return ok(data);
       } catch (e) {
+        recordAudit({ operation: "update", toolName: "ordercloud.buyers.patch", resourceType: "Buyer", resourceId: buyerId, paramsSanitized: sanitizeForAudit(params), success: false, errorMessage: e instanceof Error ? e.message : String(e) });
         return err(e);
       }
     }
@@ -102,10 +109,13 @@ export function registerBuyerTools(server: McpServer, client: OrderCloudClient):
       }),
     },
     async ({ buyerId }) => {
+      const params = { buyerId };
       try {
         await client.request("DELETE", `/v1/buyers/${buyerId}`);
+        recordAudit({ operation: "delete", toolName: "ordercloud.buyers.delete", resourceType: "Buyer", resourceId: buyerId, paramsSanitized: sanitizeForAudit(params), success: true });
         return ok({ deleted: true, buyerId });
       } catch (e) {
+        recordAudit({ operation: "delete", toolName: "ordercloud.buyers.delete", resourceType: "Buyer", resourceId: buyerId, paramsSanitized: sanitizeForAudit(params), success: false, errorMessage: e instanceof Error ? e.message : String(e) });
         return err(e);
       }
     }
@@ -173,10 +183,13 @@ export function registerBuyerTools(server: McpServer, client: OrderCloudClient):
       }),
     },
     async ({ buyerId, user }) => {
+      const params = { buyerId, user };
       try {
         const data = await client.request("POST", `/v1/buyers/${buyerId}/users`, undefined, user);
+        recordAudit({ operation: "create", toolName: "ordercloud.users.create", resourceType: "User", resourceId: user.ID, paramsSanitized: sanitizeForAudit(params), success: true });
         return ok(data);
       } catch (e) {
+        recordAudit({ operation: "create", toolName: "ordercloud.users.create", resourceType: "User", resourceId: user.ID, paramsSanitized: sanitizeForAudit(params), success: false, errorMessage: e instanceof Error ? e.message : String(e) });
         return err(e);
       }
     }
@@ -193,10 +206,13 @@ export function registerBuyerTools(server: McpServer, client: OrderCloudClient):
       }),
     },
     async ({ buyerId, userId, patch }) => {
+      const params = { buyerId, userId, patch };
       try {
         const data = await client.request("PATCH", `/v1/buyers/${buyerId}/users/${userId}`, undefined, patch);
+        recordAudit({ operation: "update", toolName: "ordercloud.users.patch", resourceType: "User", resourceId: userId, paramsSanitized: sanitizeForAudit(params), success: true });
         return ok(data);
       } catch (e) {
+        recordAudit({ operation: "update", toolName: "ordercloud.users.patch", resourceType: "User", resourceId: userId, paramsSanitized: sanitizeForAudit(params), success: false, errorMessage: e instanceof Error ? e.message : String(e) });
         return err(e);
       }
     }
@@ -212,10 +228,13 @@ export function registerBuyerTools(server: McpServer, client: OrderCloudClient):
       }),
     },
     async ({ buyerId, userId }) => {
+      const params = { buyerId, userId };
       try {
         await client.request("DELETE", `/v1/buyers/${buyerId}/users/${userId}`);
+        recordAudit({ operation: "delete", toolName: "ordercloud.users.delete", resourceType: "User", resourceId: userId, paramsSanitized: sanitizeForAudit(params), success: true });
         return ok({ deleted: true, buyerId, userId });
       } catch (e) {
+        recordAudit({ operation: "delete", toolName: "ordercloud.users.delete", resourceType: "User", resourceId: userId, paramsSanitized: sanitizeForAudit(params), success: false, errorMessage: e instanceof Error ? e.message : String(e) });
         return err(e);
       }
     }
