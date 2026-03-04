@@ -5,6 +5,39 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.0] - 2025-03-04
+
+### Added
+
+#### MCP Prompts (12 workflow prompts)
+- **Product**: `ordercloud:product.create-full`, `ordercloud:product.bulk-import`, `ordercloud:product.update-pricing`
+- **Order**: `ordercloud:order.fulfill`, `ordercloud:order.approve`, `ordercloud:order.analyze`
+- **Analysis**: `ordercloud:analyze.order-trends`, `ordercloud:analyze.product-performance`, `ordercloud:analyze.customer-activity`
+- **Bulk**: `ordercloud:bulk.activate-products`, `ordercloud:bulk.update-inventory`, `ordercloud:bulk.assign-categories`
+
+#### Composite Tools (5 multi-step tools)
+- `ordercloud.products.createFull` — Create product with price schedule, specs, variants, and category assignments in one call
+- `ordercloud.orders.fulfill` — Get worksheet, create shipment, add line items, optionally update order status
+- `ordercloud.customers.onboard` — Create buyer, default user, default address, assign default catalog
+- `ordercloud.products.bulkActivate` — Activate/deactivate multiple products with success/failure summary
+- `ordercloud.orders.generateReport` — Search orders in date range and return aggregated metrics (revenue, status breakdown)
+
+#### Bulk Product Operations
+- `ordercloud.bulk.products.create` — Create multiple products (client-side batching, configurable batchSize)
+- `ordercloud.bulk.products.patch` — Patch multiple products
+- `ordercloud.bulk.products.delete` — Delete multiple products
+- `ordercloud.bulk.products.activate` — Activate or deactivate multiple products
+
+#### Dry-Run Mode
+- Optional `dryRun: true` on `ordercloud.products.create`, `ordercloud.products.patch`, `ordercloud.products.delete`
+- Returns `{ wouldSucceed, validatedData, warnings }` without persisting to the API
+
+#### Audit Logging
+- In-memory audit log for all mutations (`src/ordercloud/helpers/audit.ts`)
+- `ordercloud.audit.export` tool — Export full audit log (count, entries, exportedAt)
+- `ordercloud://audit/log` MCP resource — Read audit log as JSON
+- **Audit on every mutation tool**: All create/patch/delete/submit/assign-style tools across all resource modules and composite tools now record audit entries (operation, toolName, resourceType, resourceId, paramsSanitized, success, errorMessage). Covers: products, catalogs, categories, buyers, users, orders, xp, suppliers, addresses, priceSchedules, specs, promotions, shipments, payments, lineItems, costCenters, spendingAccounts, bulk product tools, and composite tools (createFull, fulfill, onboard, bulkActivate).
+
 ## [1.0.1] - 2026-02-23
 
 ### Added
@@ -207,7 +240,6 @@ This is the initial release (v1.0.0.0) of the ordercloud-mcp server. If upgradin
 
 - Currently supports client credentials and bearer token authentication only
 - Some advanced OrderCloud features (webhooks, message senders) not yet implemented
-- Bulk operations and dry-run mode planned for future releases
 
 ---
 
